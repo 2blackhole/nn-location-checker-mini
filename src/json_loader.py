@@ -189,7 +189,7 @@ class ModuleLoader:
         if not self._file.exists():
             raise ValueError("File does not exist")
 
-        with open(self._file, "r", encoding="utf-8") as module_file:
+        with open(self._file, encoding="utf-8") as module_file:
             data = json.load(module_file, object_hook=_as_module_data)  # pyright: ignore[reportAny]
 
         if not isinstance(data, list):
