@@ -13,7 +13,7 @@ from matplotlib import pyplot as plot
 from dataset import Dataset, Marker
 
 
-def show_images(dataset_picks: list[tuple[torch.Tensor, int]]):
+def show_images(dataset_picks: list[tuple[torch.Tensor, int]]) -> None:
     num_showed_imgs_x = 5
     num_showed_imgs_y = 5
 
@@ -58,7 +58,7 @@ def create_argparser() -> argparse.ArgumentParser:
     return argparser
 
 
-def main(dataset_path: Path, image_size: tuple[int, int]):
+def main(dataset_path: Path, image_size: tuple[int, int]) -> None:
     dataset = Dataset(dataset_path, tt2.Resize(image_size))
 
     random_25_idx = sample(range(0, len(dataset)), 25)

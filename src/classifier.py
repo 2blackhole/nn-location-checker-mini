@@ -8,7 +8,7 @@ from utils import TensorShape
 
 
 class Classifier:
-    def __init__(self, modules: list[tnn.Module], input_shape: TensorShape):
+    def __init__(self, modules: list[tnn.Module], input_shape: TensorShape) -> None:
         if any(isinstance(module, tnn.Conv2d) for module in modules):
             raise ValueError("Convolution layers can not be in classifier")
 
@@ -33,7 +33,7 @@ class Classifier:
 
         self._out_features = previous_features
 
-    def append(self, module: tnn.Module):
+    def append(self, module: tnn.Module) -> None:
         if isinstance(module, tnn.Conv2d):
             raise ValueError("Convolution layers can not be in classifier")
 
@@ -66,8 +66,8 @@ class Classifier:
             self.append(module)
 
     @property
-    def out_features(self):
+    def out_features(self) -> int:
         return self._out_features
 
-    def sequential(self):
+    def sequential(self) -> tnn.Sequential:
         return tnn.Sequential(*self._modules)

@@ -8,7 +8,7 @@ from model_segment import ModelSegment
 
 
 class CNnetwork(tnn.Module):
-    def __init__(self, model_part: ModelSegment, classifier: Classifier):
+    def __init__(self, model_part: ModelSegment, classifier: Classifier) -> None:
         super().__init__()
 
         self._model_part: ModelSegment = model_part
@@ -16,7 +16,7 @@ class CNnetwork(tnn.Module):
         self._soft_max: tnn.Softmax = tnn.Softmax(1)
 
     @override
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor):  # noqa: ANN201
         x = self._model_part(x)  # pyright: ignore[reportAny]
         if len(x.shape) > 2:
             x = torch.flatten(x, 1)

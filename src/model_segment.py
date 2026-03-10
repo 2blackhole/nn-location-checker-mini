@@ -13,7 +13,7 @@ class SupportedModels(Enum):
     ALEXNET = auto
 
 
-def _get_modules(model: SupportedModels):
+def _get_modules(model: SupportedModels) -> list[tnn.Module]:
     modules: list[tnn.Module] = []
 
     match model:
@@ -23,12 +23,12 @@ def _get_modules(model: SupportedModels):
     return modules
 
 
-def modules_of_model(model: SupportedModels):
+def modules_of_model(model: SupportedModels) -> list[tnn.Module]:
     return _get_modules(model)
 
 
 class ModelSegment(tnn.Module):
-    def __init__(self, model: SupportedModels, index: int | slice):
+    def __init__(self, model: SupportedModels, index: int | slice) -> None:
         super().__init__()
         modules: list[tnn.Module] = []
 
@@ -56,11 +56,11 @@ class ModelSegment(tnn.Module):
 
         return result_shape
 
-    def extend(self, modules: Iterable[tnn.Module]):
+    def extend(self, modules: Iterable[tnn.Module]) -> None:
         for module in modules:
             self.append(module)
 
-    def append(self, module: tnn.Module):
+    def append(self, module: tnn.Module) -> None:
         if isinstance(module, tnn.Sequential):
             if any(isinstance(submodule, tnn.Linear) for submodule in module):
                 _ = self._classifier_layers.append(module)
@@ -71,7 +71,7 @@ class ModelSegment(tnn.Module):
         else:
             _ = self._convolution_layers.append(module)
 
-    def get_modules(self):
+    def get_modules(self) -> tnn.Sequential:
         return self._convolution_layers + self._classifier_layers
 
     @override

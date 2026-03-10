@@ -9,7 +9,7 @@ class TensorShape(NamedTuple):
     width: int
     channels: int
 
-    def in_features(self):
+    def in_features(self) -> int:
         return self.height * self.channels * self.width
 
 
@@ -47,7 +47,7 @@ def compute_conv(origin: int, padding: int, kernel_size: int, stride: int) -> in
 
 
 @compute_shape.register
-def _(module: tnn.Conv2d, previous_shape: TensorShape):
+def _(module: tnn.Conv2d, previous_shape: TensorShape) -> TensorShape:
     if isinstance(module.padding, str):
         raise NotImplementedError("Padding is string")
     new_height = compute_conv(
@@ -63,12 +63,14 @@ def _(module: tnn.Conv2d, previous_shape: TensorShape):
 
 
 @compute_shape.register
-def _(module: tnn.ReLU | tnn.Dropout | tnn.BatchNorm2d, previous_shape: TensorShape):  # pyright: ignore[reportUnusedParameter]
+def _(
+    module: tnn.ReLU | tnn.Dropout | tnn.BatchNorm2d, previous_shape: TensorShape
+) -> TensorShape:  # pyright: ignore[reportUnusedParameter]
     return previous_shape
 
 
 @compute_shape.register
-def _(module: tnn.MaxPool2d, previous_shape: TensorShape):
+def _(module: tnn.MaxPool2d, previous_shape: TensorShape) -> TensorShape:
     padding_height, padding_width = _to_pair(module.padding)
     kernel_height, kernel_width = _to_pair(module.kernel_size)
     stride_height, stride_width = _to_pair(module.stride)
@@ -85,7 +87,7 @@ def _(module: tnn.MaxPool2d, previous_shape: TensorShape):
 @compute_shape.register
 def _(
     module: tnn.AdaptiveAvgPool2d | tnn.AdaptiveMaxPool2d, previous_shape: TensorShape
-):
+) -> TensorShape:
     new_height, new_width = _to_pair(module.output_size)
 
     if new_height is None:
@@ -102,7 +104,7 @@ def _(
 
 
 @compute_shape.register
-def _(module: tnn.Sequential, previous_shape: TensorShape):
+def _(module: tnn.Sequential, previous_shape: TensorShape) -> TensorShape:
     result_shape: TensorShape = previous_shape
     for submodule in module:
         result_shape = compute_shape(submodule, result_shape)

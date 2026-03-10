@@ -7,7 +7,9 @@ from classifier import Classifier
 from utils import TensorShape
 
 
-def _build_conv2d(dct: dict[str, str | int | bool | tuple[int, int] | float]):
+def _build_conv2d(
+    dct: dict[str, str | int | bool | tuple[int, int] | float],
+) -> tnn.Conv2d:
     out = dct.get("out")
     match out:
         case (int(), int()):
@@ -53,7 +55,9 @@ def _build_conv2d(dct: dict[str, str | int | bool | tuple[int, int] | float]):
     return tnn.Conv2d(1, out, kernel, stride, padding)
 
 
-def _build_activation(dct: dict[str, str | int | bool | tuple[int, int] | float]):
+def _build_activation(
+    dct: dict[str, str | int | bool | tuple[int, int] | float],
+) -> tnn.ReLU:
     function_type = dct.get("function")
     if function_type is None:
         raise ValueError("There must be activation function type")
@@ -69,7 +73,9 @@ def _build_activation(dct: dict[str, str | int | bool | tuple[int, int] | float]
             raise NotImplementedError()
 
 
-def _build_pool(dct: dict[str, str | int | bool | tuple[int, int] | float]):
+def _build_pool(
+    dct: dict[str, str | int | bool | tuple[int, int] | float],
+) -> tnn.MaxPool2d | tnn.AvgPool2d:
     pool_type = dct.get("function")
     if pool_type is None:
         raise ValueError("There must be pool function type")
@@ -104,7 +110,9 @@ def _build_pool(dct: dict[str, str | int | bool | tuple[int, int] | float]):
             raise NotImplementedError()
 
 
-def _build_adaptive_pool(dct: dict[str, str | int | bool | tuple[int, int] | float]):
+def _build_adaptive_pool(
+    dct: dict[str, str | int | bool | tuple[int, int] | float],
+) -> tnn.AdaptiveAvgPool2d | tnn.AdaptiveMaxPool2d:
     pool_type = dct.get("function")
     if pool_type is None:
         raise ValueError("There must be pool function type")
@@ -129,7 +137,9 @@ def _build_adaptive_pool(dct: dict[str, str | int | bool | tuple[int, int] | flo
             raise ValueError("UB")
 
 
-def _build_dropout(dct: dict[str, str | int | bool | tuple[int, int] | float]):
+def _build_dropout(
+    dct: dict[str, str | int | bool | tuple[int, int] | float],
+) -> tnn.Dropout:
     percent = dct.get("percent")
     match percent:
         case None:
@@ -144,7 +154,9 @@ def _build_dropout(dct: dict[str, str | int | bool | tuple[int, int] | float]):
     return tnn.Dropout(percent, inplace)
 
 
-def _build_linear(dct: dict[str, str | int | bool | tuple[int, int] | float]):
+def _build_linear(
+    dct: dict[str, str | int | bool | tuple[int, int] | float],
+) -> tnn.Linear:
     out = dct.get("out")
     match out:
         case None:
@@ -159,7 +171,18 @@ def _build_linear(dct: dict[str, str | int | bool | tuple[int, int] | float]):
     return tnn.Linear(1, out, bias)
 
 
-def _as_module_data(dct: dict[str, str | int | bool | tuple[int, int] | float]):
+def _as_module_data(
+    dct: dict[str, str | int | bool | tuple[int, int] | float],
+) -> (
+    tnn.Conv2d
+    | tnn.ReLU
+    | tnn.AdaptiveAvgPool2d
+    | tnn.AdaptiveMaxPool2d
+    | tnn.MaxPool2d
+    | tnn.AvgPool2d
+    | tnn.Dropout
+    | tnn.Linear
+):
     module_type = dct.get("type")
     if module_type is None:
         raise ValueError("There must be module type")

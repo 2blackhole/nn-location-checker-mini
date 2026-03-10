@@ -1,7 +1,7 @@
 from enum import Enum
 from os import PathLike
 from pathlib import Path
-from typing import overload, override
+from typing import Self, overload, override
 
 import torch
 import torchvision.transforms.v2 as tt2  # pyright: ignore[reportMissingTypeStubs]
@@ -35,7 +35,7 @@ class Dataset(BaseDataset[tuple[torch.Tensor, int]]):
         self,
         images_directory: str | PathLike[str] | Path,
         transform: tt2.Compose | tt2.Transform | None = None,
-    ):
+    ) -> None:
         self._images_directory: Path = Path(images_directory)
 
         directories = list(self._images_directory.iterdir())
@@ -46,7 +46,7 @@ class Dataset(BaseDataset[tuple[torch.Tensor, int]]):
 
         self._transform: tt2.Compose | tt2.Transform | None = transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._pool)
 
     @overload
@@ -86,11 +86,11 @@ class Dataset(BaseDataset[tuple[torch.Tensor, int]]):
 
             return result_slice
 
-    def __iter__(self):
+    def __iter__(self) -> Self:
         self._pool_idx = -1
         return self
 
-    def __next__(self):
+    def __next__(self) -> tuple[torch.Tensor, int]:
         self._pool_idx += 1
 
         if self._pool_idx > len(self._pool):

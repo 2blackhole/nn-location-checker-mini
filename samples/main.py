@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def main():
+def main() -> None:
     dataset = Dataset("./dataset/", tt2.Compose([tt2.Resize((227, 227))]))
 
     batch_size = 64
@@ -112,7 +112,7 @@ def format_torchsummary(summary: str) -> str:
     return summary[model_structure_start:previous]
 
 
-def configure_logger():
+def configure_logger() -> None:
     to_logs_folder = Path("./logs/")
     if not to_logs_folder.exists():
         raise RuntimeError("Please, init logs folder in root of the project")
