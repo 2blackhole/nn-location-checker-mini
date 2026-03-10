@@ -7,7 +7,7 @@ from classifier import Classifier
 from model_segment import ModelSegment
 
 
-class CNnetwork(tnn.Module):
+class ClassificationNetwork(tnn.Module):
     def __init__(self, model_part: ModelSegment, classifier: Classifier) -> None:
         super().__init__()
 

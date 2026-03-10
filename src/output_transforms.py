@@ -3,12 +3,12 @@ import time
 import torch
 from torch.utils.data import DataLoader
 
-from build_cnn import CNnetwork
+from classification_network import ClassificationNetwork
 
 
 def get_accuracy(
     data_loader: DataLoader[tuple[torch.Tensor, int]],
-    model: CNnetwork,
+    model: ClassificationNetwork,
     device: torch.device,
 ) -> tuple[float, float]:
     tp = 0

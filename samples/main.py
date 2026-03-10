@@ -12,7 +12,7 @@ import torchvision.transforms.v2 as tt2  # pyright: ignore[reportMissingTypeStub
 from torch.utils.data import DataLoader
 from torchinfo import summary
 
-from build_cnn import CNnetwork
+from classification_network import ClassificationNetwork
 from dataset import Dataset
 from json_loader import ModuleLoader
 from model_segment import ModelSegment, SupportedModels
@@ -46,7 +46,7 @@ def main() -> None:
 
     alexnet_classifier = alexnet_classifier_loader.load(output)
 
-    cnn_model = CNnetwork(alexnet_part, alexnet_classifier)
+    cnn_model = ClassificationNetwork(alexnet_part, alexnet_classifier)
 
     model_summary = summary(cnn_model, verbose=0, depth=5, col_names=[])
 
