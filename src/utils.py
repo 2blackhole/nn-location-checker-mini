@@ -64,8 +64,8 @@ def _(module: tnn.Conv2d, previous_shape: TensorShape) -> TensorShape:
 
 @compute_shape.register
 def _(
-    module: tnn.ReLU | tnn.Dropout | tnn.BatchNorm2d, previous_shape: TensorShape
-) -> TensorShape:  # pyright: ignore[reportUnusedParameter]
+    _module: tnn.ReLU | tnn.Dropout | tnn.BatchNorm2d, previous_shape: TensorShape
+) -> TensorShape:
     return previous_shape
 
 
