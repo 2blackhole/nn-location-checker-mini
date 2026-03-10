@@ -23,11 +23,34 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+def train(
+    epochs: int,
+    loader: DataLoader,
+    device: torch.device,
+    loss_function: tnn.CrossEntropyLoss,
+    optimizer: torch.optim.Optimizer,
+    model: ClassificationNetwork,
+) -> None:
+    for epoch in range(epochs):
+        logger.info("Epoch number %i starts", epoch)
+        for _, (images, labels) in enumerate(loader):  # pyright: ignore[reportAny]
+            images = images.requires_grad_().to(device)  # pyright: ignore[reportAny]
+            labels = labels.to(device)  # pyright: ignore[reportAny]
+            outputs = model(images)  # pyright: ignore[reportAny]
+            loss = loss_function(outputs, labels)  # pyright: ignore[reportAny]
+
+            optimizer.zero_grad()
+            loss.backward()  # pyright: ignore[reportAny]
+            _ = optimizer.step()  # pyright: ignore[reportUnknownMemberType]
+        accuracy, _ = get_accuracy(loader, model, device)
+        logger.info("Epoch number %i ends", epoch)
+        logger.info("Epoch accuracy: %f", accuracy)
+        logger.info("Epoch loss: %f", loss.item())
+
+
 def main() -> None:
     dataset = Dataset("./dataset/", tt2.Compose([tt2.Resize((227, 227))]))
-
     batch_size = 64
-
     training_loader = DataLoader(
         dataset,
         batch_size,
@@ -46,20 +69,18 @@ def main() -> None:
 
     alexnet_classifier = alexnet_classifier_loader.load(output)
 
-    cnn_model = ClassificationNetwork(alexnet_part, alexnet_classifier)
+    classification_model = ClassificationNetwork(alexnet_part, alexnet_classifier)
 
-    model_summary = summary(cnn_model, verbose=0, depth=5, col_names=[])
+    model_summary = summary(classification_model, verbose=0, depth=5, col_names=[])
 
     logger.info("\n%s", format_torchsummary(str(model_summary)))
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    cnn_model = cnn_model.to(device)
+    classification_model = classification_model.to(device)
 
     learning_rate = 0.1
-
     loss_function = tnn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(cnn_model.parameters(), lr=learning_rate)
-
+    optimizer = torch.optim.SGD(classification_model.parameters(), lr=learning_rate)
     num_epochs = 2
 
     logger.info("Batch size: %i", batch_size)
@@ -71,24 +92,20 @@ def main() -> None:
     logger.info("Optimizer: %s", optimizer.__class__.__name__)
 
     logger.info("Start of training")
-    for epoch in range(num_epochs):
-        logger.info("Epoch number %i starts", epoch)
-        for _, (images, labels) in enumerate(training_loader):  # pyright: ignore[reportAny]
-            images = images.requires_grad_().to(device)  # pyright: ignore[reportAny]
-            labels = labels.to(device)  # pyright: ignore[reportAny]
-            outputs = cnn_model(images)  # pyright: ignore[reportAny]
-            loss = loss_function(outputs, labels)  # pyright: ignore[reportAny]
-
-            optimizer.zero_grad()
-            loss.backward()  # pyright: ignore[reportAny]
-            _ = optimizer.step()  # pyright: ignore[reportUnknownMemberType]
-        accuracy, _ = get_accuracy(training_loader, cnn_model, device)
-        logger.info("Epoch number %i ends", epoch)
-        logger.info("Epoch results:\naccuracy: %f\nloss: %f", accuracy, loss.item())  # pyright: ignore[reportPossiblyUnboundVariable, reportAny]
-
+    train(
+        num_epochs,
+        training_loader,
+        device,
+        loss_function,
+        optimizer,
+        classification_model,
+    )
     logger.info("End of training")
+
     logger.info("Start of testing")
-    accuracy, avg_time_per_image = get_accuracy(test_loader, cnn_model, device)
+    accuracy, avg_time_per_image = get_accuracy(
+        test_loader, classification_model, device
+    )
     logger.info("Testing accuracy: %.4f", accuracy)
     logger.info("Average time per image: %.4f ms", avg_time_per_image)
     logger.info("Classification speed: %.4f images/s", 1 / avg_time_per_image)
