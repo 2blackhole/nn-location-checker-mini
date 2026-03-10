@@ -15,18 +15,36 @@ dev = ["pytest>=9.0.2"]
 
 [tool.ruff.lint]
 select = [
-  "N",
-  "UP",
-  "E",
-  "F",
-  "I",
-  "G",
+  "N",   # pep8-naming
+  "UP",  # Modern syntax
+  "E",   # pycodestyle
+  "F",   # Pyflakes
+  "I",   # Import order (isort)
+  "LOG", # Logging
+  "G",   # Logging format
+  "B",   # Bugbear
+  "DTZ", # Datetime bugs
+  "SIM", # Simplify
+  "C4",  # Clarity
+  "RET", # Better returns
+  "PTH", # Prefer pathlib
+  "ANN", # Annotations checks
+  "ARG", # Arguments checks
+  "PT",  # Pytest style
+  "BLE", # No blind exceptions
+  "RUF", # Checks was inventend by ruff team
 ] # "D" for docstrings. It's useless for current state
 pydocstyle.convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"samples/*.py" = ["E402"]
-"tests/*.py" = ["E402"]
+"samples/*.py" = [
+  "E402", # Allow sys.path.append(...)
+]
+"tests/*.py" = [
+  "E402",   # Allow sys.path.append(...)
+  "S101",   # assert for tests
+  "ANN201", # tests don't need annotations
+]
 
 [tool.basedpyright]
 include = ["src", "samples"]
