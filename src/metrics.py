@@ -21,14 +21,15 @@ def _run_model(
     confusion_matrix = np.zeros((len(Marker), len(Marker)), dtype=np.int32)
     total_time = 0.0
     with torch.no_grad():
-        for images, labels in data_loader:  # pyright: ignore[reportAny]
-            images = images.requires_grad_().to(device)  # pyright: ignore[reportAny]
-            labels = labels.to(device)  # pyright: ignore[reportAny]
+        for images, labels in data_loader:
+            images = images.to(device)
+            labels = labels.to(device)
             batch_start_time = time.time()
-            outputs = model(images)  # pyright: ignore[reportAny]
+            outputs = model(images)
             batch_time = time.time() - batch_start_time
             total_time += batch_time
-            _, predicted = torch.max(outputs.data, 1)  # pyright: ignore[reportAny]
+            probs = torch.softmax(outputs, dim=1)
+            _, predicted = probs.max(dim=1)
             for predict, label in zip(predicted, labels, strict=True):
                 confusion_matrix[label][predict] += 1
 

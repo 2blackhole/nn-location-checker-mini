@@ -13,12 +13,10 @@ class ClassificationNetwork(tnn.Module):
 
         self._model_part: ModelSegment = model_part
         self._classifier: tnn.Sequential = classifier.sequential()
-        self._soft_max: tnn.Softmax = tnn.Softmax(1)
 
     @override
-    def forward(self, x: torch.Tensor):  # noqa: ANN201
-        x = self._model_part(x)  # pyright: ignore[reportAny]
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self._model_part(x)
         if len(x.shape) > 2:
             x = torch.flatten(x, 1)
-        x = self._classifier(x)  # pyright: ignore[reportAny]
-        return self._soft_max(x)  # pyright: ignore[reportAny]
+        return self._classifier(x)
