@@ -45,7 +45,7 @@ pydocstyle.convention = "google"
   "S101",   # assert for tests
   "ANN201", # tests don't need annotations
 ]
-"samples/main.py" = [
+"samples/train_model.py" = [
   "G004" # f-strings can't harm anything there
 ]
 

@@ -8,28 +8,24 @@ from utils import TensorShape
 
 
 class Classifier:
-    def __init__(self, modules: list[tnn.Module], input_shape: TensorShape) -> None:
+    def __init__(
+        self, modules: list[tnn.Module], input_shape: TensorShape | int
+    ) -> None:
         if any(isinstance(module, tnn.Conv2d) for module in modules):
             raise ValueError("Convolution layers can not be in classifier")
 
+        in_features = (
+            input_shape.in_features()
+            if isinstance(input_shape, TensorShape)
+            else input_shape
+        )
         self._modules: list[tnn.Module] = modules
-        self._out_features: int = input_shape.in_features()
+        previous_features: int = in_features
 
-        head = self._modules[0]
-
-        if isinstance(head, tnn.Linear):
-            self._modules[0] = tnn.Linear(input_shape.in_features(), head.out_features)
-
-        previous_features: int = input_shape.in_features()
-        for i in range(len(modules) - 1):
-            out_features: int = previous_features
-            if isinstance((module := modules[i]), tnn.Linear):
-                out_features = module.out_features
-
-            if isinstance((module := modules[i + 1]), tnn.Linear):
-                self._modules[i + 1] = tnn.Linear(out_features, module.out_features)
-
-            previous_features = out_features
+        for i, module in enumerate(modules):
+            if isinstance(module, tnn.Linear):
+                self._modules[i] = tnn.Linear(previous_features, module.out_features)
+                previous_features = module.out_features
 
         self._out_features = previous_features
 

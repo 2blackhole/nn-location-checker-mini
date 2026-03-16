@@ -1,0 +1,15 @@
+[macro_parameters]
+batch_size = 64
+epochs = 2
+
+[model]
+name = "AlexNet"
+end = 2
+classifier = "./json_modules/alexnet_classifier.json"
+
+[optimizer]
+name = "SGD"
+learning_rate = 0.1
+
+[loss_function]
+name = "CrossEntropyLoss"
