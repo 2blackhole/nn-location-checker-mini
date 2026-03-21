@@ -1,13 +1,14 @@
+import csv
 import re
-from dataclasses import dataclass, field
-from typing import ClassVar
+from collections.abc import Iterable, Iterator
+from dataclasses import dataclass, field, fields
+from pathlib import Path
+from types import TracebackType
+from typing import IO, ClassVar, Self
 
+from dataset import Marker
 
-def _find_third_colon(line: str) -> int:
-    first = line.find(":")
-    second = line.find(":", first + 1)
-
-    return line.find(":", second + 1)
+__all__ = ["Experiment", "ExperimentCSVHandler"]
 
 
 @dataclass
@@ -20,42 +21,84 @@ class Experiment:
     macro_f1: str = ""
     macro_f1_per_class: list[str] = field(default_factory=list)
 
-    REGEX: ClassVar[list[re.Pattern[str]]] = [
-        re.compile(r"Donor: (?P<data>\w*)"),
-        re.compile(r"Segment: (?P<data>\d*:\d*)"),
-        re.compile(r"Classifier: (?P<data>\[.*?\])"),
-        re.compile(r"Accuracy: (?P<data>\d*\.\d*)"),
-        re.compile(r"Macro f1 per class: (?P<data>\[.*\])"),
-        re.compile(r"Macro f1: (?P<data>\d*.\d*)"),
-        re.compile(r"Average time per image: (?P<data>\d*.\d*)"),
-        # re.compile(r"Classification speed: (?P<data>\d*.\d*)"),
-    ]
+    _FIELD_PATTERNS: ClassVar[dict[str, re.Pattern[str]]] = {
+        "donor": re.compile(r"Donor: (?P<data>\w*)"),
+        "segment": re.compile(r"Segment: (?P<data>\d*:\d*)"),
+        "classifier": re.compile(r"Classifier: (?P<data>\[.*?\])"),
+        "accuracy": re.compile(r"Accuracy: (?P<data>\d*\.\d*)"),
+        "macro_f1_per_class": re.compile(r"Macro f1 per class: (?P<data>\[.*\])"),
+        "macro_f1": re.compile(r"Macro f1: (?P<data>\d*.\d*)"),
+        "avg_time_per_image": re.compile(r"Average time per image: (?P<data>\d*.\d*)"),
+    }
 
     def update(self, line: str) -> None:
-        third_colon_pos = _find_third_colon(line)
-        message = line[third_colon_pos + 1 :].strip()
+        message = line.split(":", 3)[-1].strip()
 
-        pattern_index = len(Experiment.REGEX) + 1
-        for i, pattern in enumerate(Experiment.REGEX):
-            if (result := pattern.match(message)) is not None:
-                data = result.group("data")
-                pattern_index = i
-                break
-        else:
-            return
+        for field_name, pattern in self._FIELD_PATTERNS.items():
+            if matched := pattern.match(message):
+                data = matched.group("data")
+                if field_name == "macro_f1_per_class":
+                    setattr(self, field_name, data[1:-1].split(", "))
+                else:
+                    setattr(self, field_name, data)
+                return
 
-        match pattern_index:
-            case 0:
-                self.donor = data
-            case 1:
-                self.segment = data
-            case 2:
-                self.classifier = data
-            case 3:
-                self.accuracy = data
-            case 4:
-                self.macro_f1_per_class = data[1:-1].split(", ")
-            case 5:
-                self.macro_f1 = data
-            case 6:
-                self.avg_time_per_image = data
+    @classmethod
+    def header(cls) -> list[str]:
+        base = [
+            f.name
+            for f in fields(cls)
+            if not f.name.startswith("_") and f.name != "macro_f1_per_class"
+        ]
+        f1_per_class = [f"macro_f1_class_{i}" for i in range(len(Marker))]
+
+        return base + f1_per_class
+
+    def __iter__(self) -> Iterator[tuple[str, str]]:
+        for f in fields(self):
+            if f.name.startswith("_"):
+                continue
+
+            value = getattr(self, f.name)
+
+            if f.name.endswith("per_class"):
+                for i, score in zip(range(len(Marker)), value, strict=True):
+                    yield f"macro_f1_class_{i}", score
+            else:
+                yield f.name, value
+
+
+class ExperimentCSVHandler:
+    def __init__(self, path: Path) -> None:
+        self._path = path
+        self._file: None | IO = None
+        self._writer: None | csv.DictWriter[str] = None
+
+    def __enter__(self) -> Self:
+        file_exists = self._path.exists()
+        self._file = self._path.open("a", newline="")
+        self._writer = csv.DictWriter(self._file, fieldnames=Experiment.header())
+
+        if not file_exists:
+            self._writer.writeheader()
+
+        return self
+
+    def writerow(self, experiment: Experiment) -> None:
+        if self._writer is None:
+            raise RuntimeError("Run this method with context manager")
+        self._writer.writerow(dict(experiment))
+
+    def writerows(self, experiments: Iterable[Experiment]) -> None:
+        if self._writer is None:
+            raise RuntimeError("Run this method with context manager")
+        self._writer.writerows(dict(exp) for exp in experiments)
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        if self._file:
+            self._file.close()

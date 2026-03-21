@@ -1,6 +1,5 @@
 import argparse
 import asyncio
-import csv
 import subprocess
 import sys
 from pathlib import Path
@@ -8,7 +7,7 @@ from pathlib import Path
 src_directory = Path(__file__).resolve().parents[1].joinpath("src")
 sys.path.append(str(src_directory))
 
-from experiment import Experiment
+from experiment import Experiment, ExperimentCSVHandler
 
 
 def create_argparser() -> argparse.ArgumentParser:
@@ -85,19 +84,8 @@ def main(arguments: argparse.Namespace) -> None:
     config = arguments.config
 
     experiment = run(train_dataset, test_dataset, config)
-    with arguments.output.open("a", encoding="utf-8") as output:
-        output_writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
-
-        data = [
-            experiment.donor,
-            experiment.segment,
-            experiment.classifier,
-            experiment.accuracy,
-            experiment.avg_time_per_image,
-            experiment.macro_f1,
-        ]
-        data.extend(experiment.macro_f1_per_class)
-        output_writer.writerow(data)
+    with ExperimentCSVHandler(arguments.output) as output:
+        output.writerow(experiment)
 
 
 if __name__ == "__main__":
