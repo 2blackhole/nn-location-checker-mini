@@ -13,6 +13,8 @@ from sklearn.metrics import (
 
 from dataset import Marker
 
+__all__ = ["ModelMetrics", "Seconds"]
+
 type Seconds = float
 
 

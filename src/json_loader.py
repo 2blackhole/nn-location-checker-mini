@@ -7,6 +7,8 @@ import torch.nn as tnn
 from classifier import Classifier
 from utils import TensorShape
 
+__all__ = ["ModuleLoader"]
+
 
 def _require_int(dct: dict[str, Any], key: str) -> int:
     val = dct.get(key)

@@ -6,6 +6,8 @@ import torch.nn as tnn
 from classifier import Classifier
 from model_segment import ModelSegment
 
+__all__ = ["ClassificationNetwork"]
+
 
 class ClassificationNetwork(tnn.Module):
     def __init__(self, model_part: ModelSegment, classifier: Classifier) -> None:

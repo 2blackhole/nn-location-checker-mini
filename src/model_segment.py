@@ -8,6 +8,8 @@ import torchvision.models as models
 
 from utils import TensorShape, compute_shape
 
+__all__ = ["ModelSegment", "SupportedModels"]
+
 
 class SupportedModels(Enum):
     ALEXNET = "alexnet"
