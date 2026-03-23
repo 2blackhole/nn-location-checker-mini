@@ -48,9 +48,7 @@ def venv_exists() -> bool:
     return python.exists()
 
 
-def run(
-    train_dataset_path: Path, test_dataset_path: Path, config_path: Path
-) -> Experiment:  # TODO: think about how remove idiot suffix _path
+def run(train_dataset: Path, test_dataset: Path, config: Path) -> Experiment:
     if not venv_exists():
         raise RuntimeError("Create venv")
 
@@ -61,11 +59,11 @@ def run(
             sys.executable,
             training_script,
             "-trd",
-            str(train_dataset_path),
+            str(train_dataset),
             "-ted",
-            str(test_dataset_path),
+            str(test_dataset),
             "-c",
-            str(config_path),
+            str(config),
         ],
         stderr=asyncio.subprocess.PIPE,
         text=True,

@@ -76,51 +76,49 @@ def train(loader: DataLoader, device: torch.device, config: TrainingConfig) -> N
         logger.info(f"Epoch loss: {loss.item()}")
 
 
-def main(
-    train_dataset_path: Path, test_dataset_path: Path, config_path: Path
-) -> None:  # TODO: think about how remove idiot suffix _path
+def main(train_dataset: Path, test_dataset: Path, config: Path) -> None:
     target_shape = (227, 227)
     input_transform = tt2.Compose([tt2.Resize(target_shape)])
-    train_dataset = Dataset(train_dataset_path, input_transform)
-    test_dataset = Dataset(test_dataset_path, input_transform)
+    train_data = Dataset(train_dataset, input_transform)
+    test_data = Dataset(test_dataset, input_transform)
 
-    config = load_config(config_path, TensorShape(*target_shape, 3))
+    cfg = load_config(config, TensorShape(*target_shape, 3))
 
     train_loader = DataLoader(
-        train_dataset,
-        config.batch_size,
+        train_data,
+        cfg.batch_size,
         shuffle=True,
     )
     test_loader = DataLoader(
-        test_dataset,
-        config.batch_size,
+        test_data,
+        cfg.batch_size,
         shuffle=False,
     )
 
-    network_summary = summary(config.network, verbose=0, depth=5, col_names=[])
+    network_summary = summary(cfg.network, verbose=0, depth=5, col_names=[])
 
     logger.info(f"\n{format_torchsummary(str(network_summary))}")
-    logger.info(f"Donor: {config.donor}")
-    logger.info(f"Segment: {config.segment_start}:{config.segment_end}")
-    logger.info(f"Classifier: {config.classifier}")
+    logger.info(f"Donor: {cfg.donor}")
+    logger.info(f"Segment: {cfg.segment_start}:{cfg.segment_end}")
+    logger.info(f"Classifier: {cfg.classifier}")
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    config.network = config.network.to(device)
+    cfg.network = cfg.network.to(device)
 
-    logger.info(f"Batch size: {config.batch_size}")
+    logger.info(f"Batch size: {cfg.batch_size}")
     logger.info(f"Number of batches: {len(train_loader)}")
     logger.info(f"Device: {device}")
-    logger.info(f"Learning rate {config.learning_rate}")
-    logger.info(f"Number of epochs: {config.epochs}")
-    logger.info(f"Loss function: {config.loss_function.__class__.__name__}")
-    logger.info(f"Optimizer: {config.optimizer.__class__.__name__}")
+    logger.info(f"Learning rate {cfg.learning_rate}")
+    logger.info(f"Number of epochs: {cfg.epochs}")
+    logger.info(f"Loss function: {cfg.loss_function.__class__.__name__}")
+    logger.info(f"Optimizer: {cfg.optimizer.__class__.__name__}")
 
     logger.info("Start of training")
-    train(train_loader, device, config)
+    train(train_loader, device, cfg)
     logger.info("End of training")
 
     logger.info("Start of testing")
-    metrics = ModelMetrics(*run_model(test_loader, config.network, device))
+    metrics = ModelMetrics(*run_model(test_loader, cfg.network, device))
     logger.info(f"Accuracy: {metrics.accuracy():.4f}")
     logger.info(
         f"Macro f1 per class: {[round(metrics.f1_score(label), 4) for label in Marker]}"
