@@ -12,10 +12,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "pytest>=9.0.2",
-    "pytest-cov>=7.1.0",
-]
+dev = ["pytest>=9.0.2", "pytest-cov>=7.1.0"]
 
 [tool.ruff.lint]
 select = [
@@ -50,7 +47,7 @@ pydocstyle.convention = "google"
   "ANN201", # tests don't need annotations
 ]
 "samples/train_model.py" = [
-  "G004" # f-strings can't harm anything there
+  "G004", # f-strings can't harm anything there
 ]
 
 [tool.basedpyright]
@@ -58,7 +55,4 @@ include = ["src", "samples"]
 extraPaths = ["src"]
 
 [tool.coverage.report]
-exclude_lines = [
-    "raise NotImplementedError",
-    "@overload",
-]
+exclude_lines = ["raise NotImplementedError", "@overload"]
