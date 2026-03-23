@@ -1,3 +1,26 @@
+"""JSON-based layer configuration loader for building classifiers.
+
+This module provides `ModuleLoader`, which parses a JSON file describing
+a sequence of `torch.nn.Module` layers and constructs a `Classifier` from them.
+
+Expected JSON structure::
+
+    [
+        {"type": "linear", "out": 128},
+        {"type": "activation", "function": "relu"},
+        {"type": "dropout", "percent": 0.5},
+        {"type": "linear", "out": 15}
+    ]
+
+Supported layer types: ``linear``, ``activation``, ``pool``,
+``adaptive_pool``, ``dropout``, ``convolution``.
+
+Intended usage::
+
+    loader = ModuleLoader("classifier.json")
+    classifier = loader.load(input_shape=TensorShape(6, 6, 256))
+"""
+
 import json
 from pathlib import Path
 from typing import Any, cast
