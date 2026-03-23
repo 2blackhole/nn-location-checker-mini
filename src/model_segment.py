@@ -1,3 +1,10 @@
+"""Model registry and segmentation for feature extraction.
+
+This module provides `SupportedModels`, an enum of torchvision
+models, and `ModelSegment`, which slices a donor into a reusable
+`torch.nn.Module` separating convolutional and classifier layers.
+"""
+
 from collections.abc import Iterable
 from enum import Enum
 from typing import override
