@@ -82,7 +82,7 @@ def _build_adaptive_pool(
     dct: dict[str, Any],
 ) -> tnn.AdaptiveAvgPool2d | tnn.AdaptiveMaxPool2d:
     out_size = dct.get("out")
-    if not isinstance(out_size, tuple) or len(out_size) != 2:
+    if not isinstance(out_size, list) or len(out_size) != 2:
         raise ValueError("'out' must be a (int, int) tuple for adaptive pool")
     match _require_str(dct, "function"):
         case "max":
