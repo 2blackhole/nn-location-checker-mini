@@ -1,3 +1,20 @@
+"""Classification metrics aggregation over full evaluation runs.
+
+This module provides `ModelMetrics`, a dataclass that computes accuracy,
+precision, recall, F1, and confusion matrix from collected labels and
+predictions, with support for both macro-averaged and per-class scores.
+
+Intended usage::
+
+    metrics = ModelMetrics(
+        labels=labels,
+        predictions=predictions,
+        total_time=elapsed,
+    )
+    print(metrics.accuracy())
+    print(metrics.f1_score(Marker.KREMLIN))
+"""
+
 from dataclasses import dataclass
 from typing import ClassVar
 
