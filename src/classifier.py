@@ -1,8 +1,8 @@
 """Linear classifier builder for image classification pipelines.
 
-This module provides :class:`Classifier`, which wraps a sequence of
-:class:`torch.nn.Module` layers into a classifier,
-automatically rewiring :class:`~torch.nn.Linear` layers to match
+This module provides `Classifier`, which wraps a sequence of
+`torch.nn.Module` layers into a classifier,
+automatically rewiring `torch.nn.Linear` layers to match
 the input dimension.
 
 """

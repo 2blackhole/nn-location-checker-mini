@@ -1,8 +1,8 @@
 """Experiment data model and CSV handler for parsing and serializing log output.
 
-This module provides the :class:`Experiment` dataclass, which parses structured
+This module provides the `Experiment` dataclass, which parses structured
 log lines produced by the training pipeline and exposes results as a
-CSV-serializable object, and :class:`ExperimentCSVHandler`, a context manager
+CSV-serializable object, and `ExperimentCSVHandler`, a context manager
 for appending experiments to a CSV file.
 
 Intended usage::
