@@ -20,15 +20,12 @@ def show_images(dataset_picks: list[tuple[torch.Tensor, int]]) -> None:
     figsize = (10, 10)
     fig, axes = plot.subplots(num_showed_imgs_y, num_showed_imgs_x, figsize=figsize)
     _ = fig.suptitle("Dataset images")
-
     _ = plot.setp(plot.gcf().get_axes(), xticks=[], yticks=[])
     for i, ax in enumerate(axes.flat):
         if i < len(dataset_picks):
             img = dataset_picks[i][0].byte().permute(1, 2, 0).numpy()
             label_idx = dataset_picks[i][1]
-
             label_name = Marker(label_idx).name.capitalize().replace("_", " ")
-
             ax.imshow(img)
             ax.set_xlabel(label_name, fontsize=8)
 
@@ -38,7 +35,6 @@ def show_images(dataset_picks: list[tuple[torch.Tensor, int]]) -> None:
 
 def create_argparser() -> argparse.ArgumentParser:
     argparser = argparse.ArgumentParser()
-
     _ = argparser.add_argument(
         "-d",
         "--dataset",
@@ -60,11 +56,8 @@ def create_argparser() -> argparse.ArgumentParser:
 
 def main(dataset_path: Path, image_size: tuple[int, int]) -> None:
     dataset = Dataset(dataset_path, tt2.Resize(image_size))
-
     random_25_idx = sample(range(0, len(dataset)), 25)
-
     dataset_picks = [dataset[idx] for idx in random_25_idx]
-
     show_images(dataset_picks)
 
 
@@ -72,7 +65,6 @@ if __name__ == "__main__":
     argparser = create_argparser()
     arguments = argparser.parse_args()
 
-    dataset: Path = arguments.dataset  # pyright: ignore[reportAny]
-    image_size: tuple[int, int] = tuple(arguments.size)  # pyright: ignore[reportAny]
-
+    dataset: Path = arguments.dataset
+    image_size: tuple[int, int] = tuple(arguments.size)
     main(dataset, image_size)
