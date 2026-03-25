@@ -46,27 +46,25 @@ def create_argparser() -> argparse.ArgumentParser:
     return argparser
 
 
+def setup_dataloaders(
+    paths: tuple[Path, Path], batch_size: int, transform: tt2.Transform
+) -> tuple[DataLoader, DataLoader]:
+    train_data = Dataset(paths[0], transform)
+    test_data = Dataset(paths[1], transform)
+    return DataLoader(train_data, batch_size, shuffle=True), DataLoader(
+        test_data, batch_size, shuffle=False
+    )
+
+
 def main(train_dataset: Path, test_dataset: Path, config: Path) -> None:
     target_shape = (227, 227)
     input_transform = tt2.Compose([tt2.Resize(target_shape)])
-    train_data = Dataset(train_dataset, input_transform)
-    test_data = Dataset(test_dataset, input_transform)
-
     cfg = load_config(config, TensorShape(*target_shape, 3))
-
-    train_loader = DataLoader(
-        train_data,
-        cfg.batch_size,
-        shuffle=True,
-    )
-    test_loader = DataLoader(
-        test_data,
-        cfg.batch_size,
-        shuffle=False,
+    train_loader, test_loader = setup_dataloaders(
+        (train_dataset, test_dataset), cfg.batch_size, input_transform
     )
 
     network_summary = summary(cfg.network, verbose=0, depth=5, col_names=[])
-
     logger.info(f"\n{format_torchsummary(str(network_summary))}")
     logger.info(f"Donor: {cfg.donor}")
     logger.info(f"Segment: {cfg.segment_start}:{cfg.segment_end}")
