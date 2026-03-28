@@ -25,7 +25,7 @@ import torch.nn as tnn
 from torch.utils.data import DataLoader
 
 from classifier import Classifier
-from metrics import ModelMetrics, Seconds
+from metrics import QualityMetrics, Seconds
 from model_segment import ModelSegment
 
 if TYPE_CHECKING:
@@ -114,7 +114,8 @@ def train_model(
             config.optimizer.zero_grad()
             loss.backward()
             _ = config.optimizer.step()
-        metrics = ModelMetrics(*test_model(loader, config.network, device))
+        total_labels, total_predictions, _ = test_model(loader, config.network, device)
+        quality_metrics = QualityMetrics(total_labels, total_predictions)
         logger.info(f"Epoch number {epoch} ends")
-        logger.info(f"Epoch accuracy: {metrics.accuracy()}")
+        logger.info(f"Epoch accuracy: {quality_metrics.accuracy()}")
         logger.info(f"Epoch loss: {loss.item()}")

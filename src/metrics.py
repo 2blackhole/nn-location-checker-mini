@@ -30,16 +30,15 @@ from sklearn.metrics import (
 
 from dataset import Marker
 
-__all__ = ["ModelMetrics", "Seconds"]
+__all__ = ["QualityMetrics", "Seconds", "TimeMetrics"]
 
 type Seconds = float
 
 
 @dataclass
-class ModelMetrics:
+class QualityMetrics:
     labels: npt.NDArray[np.int8]
     predictions: npt.NDArray[np.int8]
-    total_time: Seconds
     ALL_LABELS: ClassVar[list[int]] = [label.value for label in Marker]
 
     def accuracy(self) -> float:
@@ -71,9 +70,6 @@ class ModelMetrics:
 
         return float(result)
 
-    def avg_time_per_image(self) -> float:
-        return float(self.total_time / self.predictions.size)
-
     def f1_score(self, label: Marker | None = None) -> float:
         result = 0.0
         if label is None:
@@ -89,3 +85,13 @@ class ModelMetrics:
 
     def confusion_matrix(self) -> npt.NDArray[np.int32]:
         return confusion_matrix(self.labels, self.predictions, labels=self.ALL_LABELS)
+
+
+@dataclass
+class TimeMetrics:
+    images: int
+    total_time: Seconds
+    ALL_LABELS: ClassVar[list[int]] = [label.value for label in Marker]
+
+    def avg_time_per_image(self) -> float:
+        return float(self.total_time / self.images)

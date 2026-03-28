@@ -14,7 +14,7 @@ from torchinfo import summary
 from classification_network import test_model, train_model
 from dataset import Dataset, Marker
 from logger import configure_logger
-from metrics import ModelMetrics
+from metrics import QualityMetrics, TimeMetrics
 from tensor_shape import TensorShape
 from training_config import load_config
 
@@ -113,15 +113,18 @@ def main(
     logger.info("End of training")
 
     logger.info("Start of testing")
-    metrics = ModelMetrics(*test_model(test_loader, cfg.network, device))
-    logger.info(f"Accuracy: {metrics.accuracy():.4f}")
-    logger.info(
-        f"Macro f1 per class: {[round(metrics.f1_score(label), 4) for label in Marker]}"
+    total_labels, total_predictions, total_time = test_model(
+        test_loader, cfg.network, device
     )
-    logger.info(f"Macro f1: {metrics.f1_score():.4f}")
-    logger.info(f"Average time per image: {metrics.avg_time_per_image():.4f} s")
+    quality_metrics = QualityMetrics(total_labels, total_predictions)
+    time_metrics = TimeMetrics(total_labels.size, total_time)
+    logger.info(f"Accuracy: {quality_metrics.accuracy():.4f}")
+    f1_scores = [round(quality_metrics.f1_score(label), 4) for label in Marker]
+    logger.info(f"Macro f1 per class: {f1_scores}")
+    logger.info(f"Macro f1: {quality_metrics.f1_score():.4f}")
+    logger.info(f"Average time per image: {time_metrics.avg_time_per_image():.4f} s")
     logger.info(
-        f"Classification speed: {1 / metrics.avg_time_per_image():.4f} images/s"
+        f"Classification speed: {1 / time_metrics.avg_time_per_image():.4f} images/s"
     )
     logger.info("End of testing")
 
