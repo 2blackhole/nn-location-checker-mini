@@ -12,6 +12,8 @@ Functions:
     test_model: Evaluate the network on a dataset.
 """
 
+from __future__ import annotations
+
 import logging
 import time
 from typing import TYPE_CHECKING, override
