@@ -146,7 +146,8 @@ class Experiment:
             value = getattr(self, f.name)
 
             if f.name.endswith("per_class"):
-                for i, score in zip(range(len(Marker)), value, strict=True):
+                for i in range(len(Marker)): # I was catching ValueError. Because of len(val) < marker classes due to errors
+                    score = value[i] if i < len(value) else ""
                     yield f"macro_f1_class_{i}", score
             else:
                 yield f.name, value

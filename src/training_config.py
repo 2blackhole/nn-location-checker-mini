@@ -40,6 +40,14 @@ class TrainingConfig:
     segment_start: int
     segment_end: int
 
+def get_output_shape(segment: ModelSegment, input_shape: TensorShape) -> int:
+    """Calculate actual output size by passing a dummy tensor through the segment."""
+    with torch.no_grad():
+        dummy = torch.zeros(1, input_shape.channels, input_shape.height, input_shape.width)
+        out = segment(dummy)
+        if len(out.shape) > 2:
+            out = torch.flatten(out, 1)
+        return out.shape[1]
 
 def load_config(file: Path, input_shape: TensorShape) -> TrainingConfig:
     with file.open("rb") as configuration_file:
@@ -53,7 +61,20 @@ def load_config(file: Path, input_shape: TensorShape) -> TrainingConfig:
     model = SupportedModels[model_p["name"].upper()]
     segment = ModelSegment(model, slice(model_p.get("start", 0), model_p["end"]))
 
-    output_shape = segment.compute_shape(input_shape)
+    """
+    Idk this was not working for me 
+    INFO:RuntimeError: mat1 and mat2 shapes cannot be multiplied (64x50176 and 1024x1000)
+    """
+    # output_shape = segment.compute_shape(input_shape)
+
+
+    """
+    So I searched for this one func and it's kinda works
+    """
+    output_shape = get_output_shape(segment, input_shape)
+
+
+
     classifier = ModuleLoader(model_p["classifier"]).load(output_shape)
     network = ClassificationNetwork(segment, classifier)
 

@@ -68,8 +68,9 @@ def create_argparser() -> argparse.ArgumentParser:
 
 def venv_exists() -> bool:
     project_root = Path(__file__).resolve().parents[1]
-    python = project_root.joinpath(".venv/bin/python")
-    return python.exists()
+    python_unix = project_root.joinpath(".venv/bin/python")
+    python_win = project_root.joinpath(".venv/Scripts/python.exe")
+    return python_unix.exists() or python_win.exists()
 
 
 def run(
