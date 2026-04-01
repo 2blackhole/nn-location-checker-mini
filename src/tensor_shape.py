@@ -9,6 +9,7 @@ from functools import singledispatch
 from typing import NamedTuple, Never, overload
 
 import torch.nn as tnn
+from torchvision.models.densenet import _DenseBlock, _DenseLayer, _Transition
 
 __all__ = ["TensorShape", "compute_conv", "compute_shape"]
 
@@ -73,11 +74,31 @@ def compute_shape(
 
 
 @overload
+def compute_shape(module: _DenseLayer, previous_shape: TensorShape) -> TensorShape: ...
+
+
+@overload
+def compute_shape(module: _DenseBlock, previous_shape: TensorShape) -> TensorShape: ...
+
+
+@overload
+def compute_shape(module: _Transition, previous_shape: TensorShape) -> TensorShape: ...
+
+
+@overload
+def compute_shape(
+    module: tnn.AvgPool2d, previous_shape: TensorShape
+) -> TensorShape: ...
+
+
+@overload
 def compute_shape(module: tnn.Module, previous_shape: TensorShape) -> Never: ...
 
 
-def compute_conv(origin: int, padding: int, kernel_size: int, stride: int) -> int:
-    return (origin + 2 * padding - (kernel_size - 1) - 1) // stride + 1
+def compute_conv(
+    origin: int, padding: int, kernel_size: int, stride: int, dilation: int
+) -> int:
+    return (origin + 2 * padding - dilation * (kernel_size - 1) - 1) // stride + 1
 
 
 @singledispatch
@@ -96,9 +117,14 @@ def _(module: tnn.Conv2d, previous_shape: TensorShape) -> TensorShape:
         module.padding[0],
         module.kernel_size[0],
         module.stride[0],
+        module.dilation[0],
     )
     new_width = compute_conv(
-        previous_shape.width, module.padding[1], module.kernel_size[1], module.stride[1]
+        previous_shape.width,
+        module.padding[1],
+        module.kernel_size[1],
+        module.stride[1],
+        module.dilation[1],
     )
     return TensorShape(new_height, new_width, module.out_channels)
 
@@ -115,12 +141,32 @@ def _(module: tnn.MaxPool2d, previous_shape: TensorShape) -> TensorShape:
     padding_height, padding_width = _to_pair(module.padding)
     kernel_height, kernel_width = _to_pair(module.kernel_size)
     stride_height, stride_width = _to_pair(module.stride)
+    dilation_height, dilation_width = _to_pair(module.dilation)
 
     new_height = compute_conv(
-        previous_shape.height, padding_height, kernel_height, stride_height
+        previous_shape.height,
+        padding_height,
+        kernel_height,
+        stride_height,
+        dilation_height,
     )
     new_width = compute_conv(
-        previous_shape.width, padding_width, kernel_width, stride_width
+        previous_shape.width, padding_width, kernel_width, stride_width, dilation_width
+    )
+    return TensorShape(new_height, new_width, previous_shape.channels)
+
+
+@compute_shape.register
+def _(module: tnn.AvgPool2d, previous_shape: TensorShape) -> TensorShape:
+    padding_height, padding_width = _to_pair(module.padding)
+    kernel_height, kernel_width = _to_pair(module.kernel_size)
+    stride_height, stride_width = _to_pair(module.stride)
+
+    new_height = compute_conv(
+        previous_shape.height, padding_height, kernel_height, stride_height, 1
+    )
+    new_width = compute_conv(
+        previous_shape.width, padding_width, kernel_width, stride_width, 1
     )
     return TensorShape(new_height, new_width, previous_shape.channels)
 
@@ -145,9 +191,39 @@ def _(
 
 
 @compute_shape.register
-def _(module: tnn.Sequential, previous_shape: TensorShape) -> TensorShape:
-    result_shape: TensorShape = previous_shape
+def _(
+    module: tnn.Sequential,
+    previous_shape: TensorShape,
+) -> TensorShape:
+    result_shape = previous_shape
     for submodule in module:
         result_shape = compute_shape(submodule, result_shape)
+    return result_shape
 
+
+@compute_shape.register
+def _(module: _DenseLayer, previous_shape: TensorShape) -> TensorShape:
+    result_shape = previous_shape
+    for submodule in module.children():
+        result_shape = compute_shape(submodule, result_shape)
+    return TensorShape(
+        result_shape.height,
+        result_shape.width,
+        previous_shape.channels + result_shape.channels,
+    )
+
+
+@compute_shape.register
+def _(module: _DenseBlock, previous_shape: TensorShape) -> TensorShape:
+    result_shape = previous_shape
+    for layer in module.children():
+        result_shape = compute_shape(layer, result_shape)
+    return result_shape
+
+
+@compute_shape.register
+def _(module: _Transition, previous_shape: TensorShape) -> TensorShape:
+    result_shape = previous_shape
+    for submodule in module.children():
+        result_shape = compute_shape(submodule, result_shape)
     return result_shape

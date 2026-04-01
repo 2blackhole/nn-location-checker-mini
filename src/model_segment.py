@@ -102,7 +102,9 @@ class ModelSegment(tnn.Module):
         elif isinstance(module, tnn.Linear):
             self._classifier_layers.append(module)
         else:
-            self._convolution_layers.append(module)
+            self._convolution_layers.append(
+                module
+            )  # For the future: _DenseBlock & _Transition come here too
 
     def get_modules(self) -> tnn.Sequential:
         return self._convolution_layers + self._classifier_layers

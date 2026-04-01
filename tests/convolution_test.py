@@ -10,7 +10,7 @@ from tensor_shape import TensorShape, compute_conv, compute_shape
 
 
 def test_compute_conv():
-    result = compute_conv(227, 2, 11, 4)
+    result = compute_conv(227, 2, 11, 4, 1)
     assert result == 56
 
 
@@ -22,8 +22,10 @@ def test_conv():
     conv = tnn.Conv2d(3, 64, padding=padding, kernel_size=kernel_size, stride=stride)
     result = compute_shape(conv, shape)
 
-    checker_height = compute_conv(shape.height, padding[0], kernel_size[0], stride[0])
-    checker_width = compute_conv(shape.width, padding[1], kernel_size[1], stride[1])
+    checker_height = compute_conv(
+        shape.height, padding[0], kernel_size[0], stride[0], 1
+    )
+    checker_width = compute_conv(shape.width, padding[1], kernel_size[1], stride[1], 1)
     checker = TensorShape(checker_height, checker_width, 64)
 
     assert result == checker
@@ -64,8 +66,10 @@ def test_max_pool():
     pool = tnn.MaxPool2d(kernel_size[0], stride[0], padding[0])
     result = compute_shape(pool, shape)
 
-    checker_height = compute_conv(shape.height, padding[0], kernel_size[0], stride[0])
-    checker_width = compute_conv(shape.width, padding[1], kernel_size[1], stride[1])
+    checker_height = compute_conv(
+        shape.height, padding[0], kernel_size[0], stride[0], 1
+    )
+    checker_width = compute_conv(shape.width, padding[1], kernel_size[1], stride[1], 1)
     checker = TensorShape(checker_height, checker_width, 3)
 
     assert result == checker
