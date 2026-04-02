@@ -31,7 +31,14 @@ def create_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def load_data(csv_path: Path) -> tuple[list[str], list[float], list[float], list[float]]:
+def load_data(
+    csv_path: Path,
+) -> tuple[
+    list[str],
+    list[float],
+    list[float],
+    list[float],
+]:
     """Load CSV and return labels, accuracy, macro_f1, avg_time_per_image.
 
     Returns:
@@ -46,12 +53,18 @@ def load_data(csv_path: Path) -> tuple[list[str], list[float], list[float], list
         reader = csv.DictReader(f)
 
         # Check if classifier_name column exists
-        has_classifier_name = "classifier_name" in reader.fieldnames if reader.fieldnames else False
+        has_classifier_name = (
+            "classifier_name" in reader.fieldnames
+            if reader.fieldnames
+            else False
+        )
 
         for row in reader:
             donor = row.get("donor", "").strip()
             segment = row.get("segment", "").strip()
-            classifier_name = row.get("classifier_name", "").strip() if has_classifier_name else ""
+            classifier_name = (
+                row.get("classifier_name", "").strip() if has_classifier_name else ""
+            )
 
             # Skip rows with missing essential data
             if not donor:
