@@ -256,11 +256,3 @@ def _(module: Bottleneck, previous_shape: TensorShape) -> TensorShape:
             continue
         result_shape = compute_shape(submodule, result_shape)
     return result_shape
-
-# _DenseBlock had not been caught with anything before (It had not been recognized)
-@compute_shape.register
-def _(module: tnn.Module, previous_shape: TensorShape) -> TensorShape:
-    shape = previous_shape
-    for submodule in module.children():
-        shape = compute_shape(submodule, shape)
-    return shape
