@@ -203,7 +203,7 @@ def test_invalid_model_name_raises(
     content = VALID_TOML_TEMPLATE.format(classifier_path=classifier_json).replace(
         'name = "alexnet"', 'name = "nonexistent_model"'
     )
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError, match="Unknown model"):
         load_config(write_toml(tmp_path, content), input_shape)
 
 

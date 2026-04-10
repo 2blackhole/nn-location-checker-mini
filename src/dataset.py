@@ -64,6 +64,7 @@ class Dataset(BaseDataset[tuple[torch.Tensor, int]]):
         self,
         images_directory: str | PathLike[str] | Path,
         transform: tt2.Transform | None = None,
+        to_float: bool = False,
     ) -> None:
         self._images_directory: Path = Path(images_directory)
 
@@ -74,14 +75,23 @@ class Dataset(BaseDataset[tuple[torch.Tensor, int]]):
         self._pool_idx: int = -1
 
         self._transform: tt2.Compose | tt2.Transform | None = transform
+        self.to_float = to_float
 
     def __len__(self) -> int:
         return len(self._pool)
 
     def _load_image(self, image_path: Path) -> torch.Tensor:
-        image = decode_image(
-            str(image_path), ImageReadMode.RGB, apply_exif_orientation=True
-        )
+        if self.to_float:
+            float_transform = tt2.ConvertImageDtype(torch.float32)
+            image = float_transform(
+                decode_image(
+                    str(image_path), ImageReadMode.RGB, apply_exif_orientation=True
+                )
+            )
+        else:
+            image = decode_image(
+                str(image_path), ImageReadMode.RGB, apply_exif_orientation=True
+            )
 
         if self._transform is not None:
             image = self._transform(image)
