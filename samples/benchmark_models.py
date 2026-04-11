@@ -93,8 +93,8 @@ def run_experiment(
         subprocess.run(cmd, check=True, capture_output=False)
     except subprocess.CalledProcessError as e:
         logger.error(
-            f"Experiment failed for {config_path.name} "
-            f"with exit code {e.returncode}"
+            "Experiment failed for %s with exit code %d",
+            config_path.name, e.returncode
         )
         raise RuntimeError(
             f"Experiment {config_path.name} failed, check logs"
@@ -106,9 +106,9 @@ def main() -> None:
     args = create_argparser().parse_args()
     config_files = get_config_files(args.configs_folder)
 
-    logger.info(f"Found {len(config_files)} config files:")
+    logger.info("Found %d config files:", len(config_files))
     for cfg in config_files:
-        logger.info(f"  {cfg.name}")
+        logger.info("  %s", cfg.name)
 
     output_csv = args.output
 
@@ -116,13 +116,13 @@ def main() -> None:
         model_name = cfg.stem
         if not is_valid_model_name(model_name):
             logger.warning(
-                f"Model name '{model_name}' not found in SupportedModels, "
-                "continuing anyway."
+                "Model name '%s' not found in SupportedModels, continuing anyway.",
+                model_name
             )
-        logger.info(f"\n=== Running experiment for {model_name} ===")
+        logger.info("\n=== Running experiment for %s ===", model_name)
         run_experiment(cfg, args, output_csv)
 
-    logger.info(f"\nAll experiments finished. Results saved to {output_csv}")
+    logger.info("\nAll experiments finished. Results saved to %s", output_csv)
 
 
 if __name__ == "__main__":

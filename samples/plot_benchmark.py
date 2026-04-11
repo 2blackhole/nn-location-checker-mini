@@ -245,7 +245,7 @@ def main() -> None:
             raise FileNotFoundError(f"Input file {args.input} not found.")
         data = load_data(args.input)
         plot_metrics(*data, args.output, args.show)
-    except Exception as e:
+    except Exception:
         logger.exception("Fatal error in plotting script")
         sys.exit(1)
 
