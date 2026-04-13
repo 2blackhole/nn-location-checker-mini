@@ -1,6 +1,6 @@
 import argparse
-import asyncio
 import logging
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -72,6 +72,14 @@ def venv_exists() -> bool:
     return python.exists()
 
 
+_LOG_PREFIX = re.compile(r"^\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2} \w+:(.*)", re.DOTALL)
+
+
+def dedup_logger_output(message: str) -> str:
+    m = _LOG_PREFIX.match(message)
+    return m.group(1) if m else message
+
+
 def run(
     train_dataset: Path, test_dataset: Path, config: Path, target_shape: tuple[int, int]
 ) -> Experiment:
@@ -94,12 +102,12 @@ def run(
             str(target_shape[0]),
             str(target_shape[1]),
         ],
-        stderr=asyncio.subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
         bufsize=1,
     ) as training:
         for line in training.stderr:  # ty:ignore[not-iterable]
-            logger.info(line.strip())
+            logger.info(dedup_logger_output(line.rstrip()))
             experiment.update(line)
 
     return experiment
