@@ -15,7 +15,6 @@ from classification_network import test_model, train_model
 from dataset import Dataset, Marker
 from logger import configure_logger
 from metrics import QualityMetrics, TimeMetrics
-from tensor_shape import TensorShape
 from training_config import load_config
 
 logger = logging.getLogger(__name__)
@@ -54,14 +53,6 @@ def create_argparser() -> argparse.ArgumentParser:
         default="train.log",
         help="Name of the log file with extension",
     )
-    _ = argparser.add_argument(
-        "-s",
-        "--size",
-        type=int,
-        nargs=2,
-        default=(500, 500),
-        help="Size of images",
-    )
 
     return argparser
 
@@ -82,13 +73,12 @@ def format_torchsummary(summary: str) -> str:
     return "\n".join(lines[3:end])
 
 
-def main(
-    train_dataset: Path, test_dataset: Path, config: Path, target_shape: tuple[int, int]
-) -> None:
-    input_transform = tt2.Compose([tt2.Resize(target_shape)])
-    cfg = load_config(config, TensorShape(*target_shape, 3))
+def main(train_dataset: Path, test_dataset: Path, config: Path) -> None:
+    cfg = load_config(config)
     train_loader, test_loader = setup_dataloaders(
-        (train_dataset, test_dataset), cfg.batch_size, input_transform
+        (train_dataset, test_dataset),
+        cfg.batch_size,
+        tt2.Resize(cfg.target_shape[:2]) if cfg.transform is None else cfg.transform,
     )
 
     network_summary = summary(cfg.network, verbose=0, depth=5, col_names=[])
@@ -134,5 +124,4 @@ if __name__ == "__main__":
     train_dataset = arguments.train_dataset
     test_dataset = arguments.test_dataset or arguments.train_dataset
     config = arguments.config
-    target_shape = arguments.size
-    main(train_dataset, test_dataset, config, target_shape)
+    main(train_dataset, test_dataset, config)

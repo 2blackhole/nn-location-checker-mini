@@ -116,7 +116,7 @@ def compute_conv(
 
 
 @singledispatch
-def compute_shape(module: tnn.Module, previous_shape: TensorShape) -> Never:
+def compute_shape(module: tnn.Module, _previous_shape: TensorShape) -> Never:
     raise NotImplementedError(
         f"Cannot compute features map for the module: {type(module).__name__}"
     )

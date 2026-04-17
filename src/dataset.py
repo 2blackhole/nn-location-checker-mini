@@ -60,6 +60,8 @@ class Marker(Enum):
 
 
 class Dataset(BaseDataset[tuple[torch.Tensor, int]]):
+    float_transform = tt2.ConvertImageDtype(torch.float32)
+
     def __init__(
         self,
         images_directory: str | PathLike[str] | Path,
@@ -73,14 +75,16 @@ class Dataset(BaseDataset[tuple[torch.Tensor, int]]):
         self._pool: list[tuple[Path, Marker]] = self._load_pool(directories)
         self._pool_idx: int = -1
 
-        self._transform: tt2.Compose | tt2.Transform | None = transform
+        self._transform: tt2.Transform | None = transform
 
     def __len__(self) -> int:
         return len(self._pool)
 
     def _load_image(self, image_path: Path) -> torch.Tensor:
-        image = decode_image(
-            str(image_path), ImageReadMode.RGB, apply_exif_orientation=True
+        image = Dataset.float_transform(
+            decode_image(
+                str(image_path), ImageReadMode.RGB, apply_exif_orientation=True
+            )
         )
 
         if self._transform is not None:
