@@ -1,6 +1,6 @@
-# Скрипты
+# Приложения
 
-Краткое описание скриптов, более подробная информация приведена ниже.
+## Краткое описание скриптов
 
 - [`train_model.py`](#обучение-модели) — обучение собираемой модели. 
 - [`run_experiment.py`](#эксперимент) — обучение модели с записью результатов
@@ -8,7 +8,7 @@
 - [`show_dataset.py`](#вывод-набора-данных) — вывод случайных 25 изображений
   набора данных с указанием классов.
 
-# Обучение модели
+## Обучение модели
 
 > [!IMPORTANT]
 > Все скрипты запускаются из виртуального окружения,
@@ -16,12 +16,12 @@
 > будет опущен в угоду читаемости.
 
 ```bash
-$ python train_model.py -trd <train_dataset_folder> \
-                        -ted <test_dataset_folder> \
-                        -c <config_file> \
-                        -lf <log_folder> \
-                        -ln <log_name> \
-                        -s <size> <size>
+python train_model.py -trd <train_dataset_folder> \
+                      -ted <test_dataset_folder> \
+                      -c <config_file> \
+                      -lf <log_folder> \
+                      -ln <log_name> \
+                      -s <size> <size>
 ```
 
 **Аргументы:**
@@ -32,7 +32,7 @@ $ python train_model.py -trd <train_dataset_folder> \
   например `01_NizhnyNovgorodKremlin`.
 - `config_file` — конфигурационный файл модели в формате toml.
 
-Пример:
+**Пример:**
 
 ```toml
 [macro_parameters]
@@ -57,28 +57,28 @@ name = "CrossEntropyLoss"
 - `size` — ширина и высота изображений, подаваемых
   на вход нейросети.
 
-# Эксперимент
+## Эксперимент
 
 ```bash
-$ python train_model.py -trd <train_dataset_folder>
-                        -ted <test_dataset_folder>
-                        -c <config_file>
-                        -lf <log_folder>
-                        -ln <log_name>
-                        -s <size> <size>
-                        -o <output_file>
+python train_model.py -trd <train_dataset_folder>
+                      -ted <test_dataset_folder>
+                      -c <config_file>
+                      -lf <log_folder>
+                      -ln <log_name>
+                      -s <size> <size>
+                      -o <output_file>
 ```
 
 **Аргументы:**
 
-- `output_file` — csv файл, в который будет записан результат эксперимента.
-- Остальные аргументы аналогичны скрипту [`train_model.py`](#тренировка-модели).
+- `output_file` — csv-файл, в который будет записан результат эксперимента.
+- остальные аргументы аналогичны скрипту [`train_model.py`](#тренировка-модели).
 
 # Вывод набора данных
 
 ```bash
-$ python show_dataset.py -d <dataset_folder>
-                         -s <size> <size>
+python show_dataset.py -d <dataset_folder>
+                       -s <size> <size>
 ```
 
 **Аргументы:**
