@@ -11,6 +11,7 @@ from typing import NamedTuple, Never, overload
 import torch.nn as tnn
 from torchvision.models.densenet import _DenseBlock, _DenseLayer, _Transition
 from torchvision.models.resnet import BasicBlock, Bottleneck
+from torchvision.models.squeezenet import Fire
 
 __all__ = ["TensorShape", "compute_conv", "compute_shape"]
 
@@ -98,6 +99,10 @@ def compute_shape(module: BasicBlock, previous_shape: TensorShape) -> TensorShap
 
 @overload
 def compute_shape(module: Bottleneck, previous_shape: TensorShape) -> TensorShape: ...
+
+
+@overload
+def compute_shape(module: Fire, previous_shape: TensorShape) -> TensorShape: ...
 
 
 @overload
@@ -256,3 +261,9 @@ def _(module: Bottleneck, previous_shape: TensorShape) -> TensorShape:
             continue
         result_shape = compute_shape(submodule, result_shape)
     return result_shape
+
+
+@compute_shape.register
+def _(module: Fire, previous_shape: TensorShape) -> TensorShape:
+    out_channels = module.expand1x1.out_channels + module.expand3x3.out_channels
+    return TensorShape(previous_shape.height, previous_shape.width, out_channels)
