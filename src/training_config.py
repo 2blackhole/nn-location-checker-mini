@@ -15,6 +15,7 @@ Intended usage::
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import torch
 import torchvision.transforms.v2 as tt2
@@ -54,10 +55,10 @@ def load_config(file: Path) -> TrainingConfig:
     optimizer_p = config["optimizer"]
     loss_p = config["loss_function"]
 
-    height, width = model_p["image_size"]
-    target_shape = TensorShape(height, width, 3)
     model = lookup_model(model_p["name"])
     internals = load_model_internals(model)
+    height, width = cast(tt2.CenterCrop, internals.transform.transforms[1]).size
+    target_shape = TensorShape(height, width, 3)
     segment_start = model_p.get("start", 0)
     segment_end = model_p["end"]
     segment = ModelSegment(internals.modules, slice(segment_start, segment_end))

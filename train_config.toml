@@ -4,8 +4,7 @@ epochs = 1
 
 [model]
 name = "AlexNet"
-end = 2
-image_size = [224, 224]
+end = 1
 classifier = "./json_modules/alexnet_classifier.json"
 
 [optimizer]

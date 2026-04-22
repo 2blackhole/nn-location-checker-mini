@@ -64,6 +64,276 @@ class _TorchvisionModel(Enum):
     MNASNET_1_3 = "mnasnet1_3"
 
 
+_MODEL_TRANSFORMATIONS = {
+    "ALEXNET": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_11": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_13": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_16": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_19": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_11_BN": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_13_BN": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_16_BN": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "VGG_19_BN": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNET_18": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNET_34": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNET_50": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNET_101": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNET_152": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "SQUEEZENET_1_0": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "SQUEEZENET_1_1": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "DENSENET_121": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "DENSENET_161": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "DENSENET_169": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "DENSENET_201": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "INCEPTION_V3": tt2.Compose(
+        [
+            tt2.Resize((342, 342)),
+            tt2.CenterCrop(299),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "GOOGLENET": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "SHUFFLENET_V2_0_5": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "SHUFFLENET_V2_1_0": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "SHUFFLENET_V2_1_5": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "SHUFFLENET_V2_2_0": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "MOBILENET_V2": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "MOBILENET_V3_L": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "MOBILENET_V3_S": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNEXT_50": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNEXT_101_32": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "RESNEXT_101_64": tt2.Compose(
+        [
+            tt2.Resize((232, 232)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "WIDERESNET_50_2": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "WIDERESNET_101_2": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "MNASNET_0_5": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "MNASNET_0_75": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "MNASNET_1_0": tt2.Compose(
+        [
+            tt2.Resize((256, 256)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+    "MNASNET_1_3": tt2.Compose(
+        [
+            tt2.Resize((232, 232)),
+            tt2.CenterCrop(224),
+            tt2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    ),
+}
+
+
 class _OpenClipSpec(NamedTuple):
     model_name: str
     pretrained: str
@@ -80,7 +350,7 @@ KnownModel = _TorchvisionModel | _OpenClipModel
 @dataclass(frozen=True)
 class ModelInternals:
     modules: list[tnn.Module]
-    transform: tt2.Transform | None
+    transform: tt2.Compose
 
 
 def load_model_internals(model: KnownModel) -> ModelInternals:
@@ -91,7 +361,7 @@ def load_model_internals(model: KnownModel) -> ModelInternals:
             donor = getattr(tvm, name)(weights=weights)
             return ModelInternals(
                 modules=list(donor.children()),
-                transform=None,
+                transform=_MODEL_TRANSFORMATIONS[model.name.upper()],
             )
         case _OpenClipModel():
             spec = model.value
