@@ -39,10 +39,12 @@ pydocstyle.convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "samples/benchmark_models.py" = [
-  "G004" # Allow using f-strings in logging
+  "G004",  # Allow using f-strings in logging
+  "BLE001" # Allow except Exception
 ]
 "samples/plot_benchmark.py" = [
-  "G004" # Allow using f-strings in logging
+  "G004", # Allow using f-strings in logging
+  "BLE001" # Allow except Exception
 ]
 "samples/*.py" = [
   "E402", # Allow sys.path.append(...)
