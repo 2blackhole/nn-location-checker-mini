@@ -1,11 +1,12 @@
 [macro_parameters]
 batch_size = 64
 epochs = 1
+target_shape = [224, 224]
 
 [model]
 name = "googlenet"
 end = 3
-classifier = "../json_modules/default_classifier.json"
+classifier = "../classifiers/default_classifier.json"
 
 [optimizer]
 name = "SGD"
