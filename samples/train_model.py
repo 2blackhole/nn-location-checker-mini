@@ -1,5 +1,6 @@
 import argparse
 import logging
+import re
 from pathlib import Path
 from sys import path as sys_path
 
@@ -15,7 +16,6 @@ from classification_network import test_model, train_model
 from dataset import Dataset, Marker
 from logger import configure_logger
 from metrics import QualityMetrics, TimeMetrics
-from tensor_shape import TensorShape
 from training_config import load_config
 
 logger = logging.getLogger(__name__)
@@ -55,12 +55,11 @@ def create_argparser() -> argparse.ArgumentParser:
         help="Name of the log file with extension",
     )
     _ = argparser.add_argument(
-        "-s",
-        "--size",
-        type=int,
-        nargs=2,
-        default=(500, 500),
-        help="Size of images",
+        "-m",
+        "--models_folder",
+        type=Path,
+        default=Path("./models/"),
+        help="Path to folder where model's weights will be saved",
     )
 
     return argparser
@@ -82,17 +81,24 @@ def format_torchsummary(summary: str) -> str:
     return "\n".join(lines[3:end])
 
 
+def create_file_name(save_folder: Path) -> str:
+    model_pattern = re.compile(r"\w+-(\d+)\.pt")
+    last_number = 0
+    for file in save_folder.iterdir():
+        if (match := model_pattern.fullmatch(file.name)) is not None:
+            last_number = max(last_number, int(match.group(1)))
+
+    return f"experiment-{last_number + 1}.pt"
+
+
 def main(
-    train_dataset: Path, test_dataset: Path, config: Path, target_shape: tuple[int, int]
+    train_dataset: Path, test_dataset: Path, config: Path, save_folder: Path
 ) -> None:
-    input_transform = tt2.Compose([
-        tt2.Resize(target_shape),
-        tt2.Lambda(lambda x: x[:3] if x.shape[0] == 4 else x),
-        tt2.ConvertImageDtype(torch.uint8)
-    ])
-    cfg = load_config(config, TensorShape(*target_shape, 3))
+    cfg = load_config(config)
     train_loader, test_loader = setup_dataloaders(
-        (train_dataset, test_dataset), cfg.batch_size, input_transform
+        (train_dataset, test_dataset),
+        cfg.batch_size,
+        tt2.Resize(cfg.target_shape[:2]) if cfg.transform is None else cfg.transform,
     )
 
     network_summary = summary(cfg.network, verbose=0, depth=5, col_names=[])
@@ -130,6 +136,17 @@ def main(
     logger.info(f"Average time per image: {time_metrics.avg_time_per_image():.4f} s")
     logger.info(f"Classification speed: {time_metrics.fps():.4f} images/s")
     logger.info("End of testing")
+    logger.info(f"Save model's weights to {save_folder}")
+    try:
+        if not save_folder.exists():
+            save_folder.mkdir()
+        cfg.network = cfg.network.cpu()
+        file_path = save_folder.joinpath(create_file_name(save_folder))
+        with file_path.open(mode="wb") as weights_file:
+            torch.save(cfg.network.state_dict(), weights_file)
+    except Exception as e:
+        logger.critical(f"Can't write to file {file_path}")
+        logger.exception(e)
 
 
 if __name__ == "__main__":
@@ -139,5 +156,5 @@ if __name__ == "__main__":
     train_dataset = arguments.train_dataset
     test_dataset = arguments.test_dataset or arguments.train_dataset
     config = arguments.config
-    target_shape = arguments.size
-    main(train_dataset, test_dataset, config, target_shape)
+    save_folder = arguments.models_folder
+    main(train_dataset, test_dataset, config, save_folder)
