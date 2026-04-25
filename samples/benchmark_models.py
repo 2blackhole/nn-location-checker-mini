@@ -12,8 +12,6 @@ from pathlib import Path
 src_dir = Path(__file__).resolve().parents[1] / "src"
 sys.path.append(str(src_dir))
 
-from model_segment import SupportedModels
-
 logger = logging.getLogger(__name__)
 
 
@@ -43,29 +41,27 @@ def create_argparser() -> argparse.ArgumentParser:
         help="Path to the log folder"
     )
     parser.add_argument(
-        "-s", "--size", type=int, nargs=2, default=(500, 500),
-        help="Image size (height width)"
+        "-m", "--models-folder", type=Path, default=Path("./models"),
+        help="Path to folder where models will be saved"
+    )
+    parser.add_argument(
+        "--skip-configs", type=str, nargs="+", default=[],
+        help="Skip configs with given names (without .toml extension)"
     )
     return parser
 
 
-def is_valid_model_name(name: str) -> bool:
-    """Check if model name exists in SupportedModels."""
-    try:
-        _ = SupportedModels[name.upper()]
-        return True
-    except KeyError:
-        return False
-
-
-def get_config_files(configs_folder: Path) -> list[Path]:
-    """Return sorted list of .toml config files."""
+def get_config_files(configs_folder: Path, skip_names: set[str]) -> list[Path]:
+    """Return sorted list of .toml config files, skipping those in skip_names."""
     if not configs_folder.exists():
         raise FileNotFoundError(f"Configs folder {configs_folder} does not exist.")
-    config_files = sorted(configs_folder.glob("*.toml"))
-    if not config_files:
-        raise FileNotFoundError(f"No .toml files found in {configs_folder}")
-    return config_files
+    all_configs = sorted(configs_folder.glob("*.toml"))
+    filtered = [cfg for cfg in all_configs if cfg.stem not in skip_names]
+    if not filtered:
+        raise FileNotFoundError(
+            f"No .toml files found in {configs_folder} after skipping."
+        )
+    return filtered
 
 
 def run_experiment(
@@ -83,7 +79,7 @@ def run_experiment(
         "-c", str(config_path),
         "-o", str(output_csv),
         "-lf", str(args.log_folder),
-        "-s", str(args.size[0]), str(args.size[1]),
+        "-m", str(args.models_folder),
     ]
     subprocess.run(cmd, check=True, capture_output=False)
 
@@ -91,8 +87,11 @@ def run_experiment(
 def main() -> None:
     """Main entry point: run all experiments and collect results."""
     args = create_argparser().parse_args()
-    config_files = get_config_files(args.configs_folder)
+    skip_set = set(args.skip_configs)
+    config_files = get_config_files(args.configs_folder, skip_set)
 
+    if skip_set:
+        logger.info(f"Skipping {len(skip_set)} config(s): {', '.join(skip_set)}")
     logger.info(f"Found {len(config_files)} config files:")
     for cfg in config_files:
         logger.info(f"  {cfg.name}")
@@ -101,15 +100,10 @@ def main() -> None:
 
     for cfg in config_files:
         model_name = cfg.stem
-        if not is_valid_model_name(model_name):
-            logger.warning(
-                f"Model name '{model_name}' not found in SupportedModels, "
-                "continuing anyway."
-            )
         logger.info(f"\n=== Running experiment for {model_name} ===")
         try:
             run_experiment(cfg, args, output_csv)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Experiment {cfg.name} failed: {e}")
             logger.info("Continuing with next config...")
 
