@@ -98,7 +98,7 @@ def main(
     train_loader, test_loader = setup_dataloaders(
         (train_dataset, test_dataset),
         cfg.batch_size,
-        tt2.Resize(cfg.target_shape[:2]) if cfg.transform is None else cfg.transform,
+        cfg.transform,
     )
 
     network_summary = summary(cfg.network, verbose=0, depth=5, col_names=[])
