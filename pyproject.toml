@@ -56,6 +56,9 @@ pydocstyle.convention = "google"
 "src/classification_network.py" = [
   "G004", # f-strings can't harm anything there
 ]
+"samples/retest.py" = [
+  "G004", # f-strings can't harm anything there
+]
 
 [tool.basedpyright]
 include = ["src", "samples"]
