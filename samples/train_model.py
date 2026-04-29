@@ -32,7 +32,11 @@ def create_argparser() -> argparse.ArgumentParser:
         help="Path to train dataset",
     )
     argparser.add_argument(
-        "-ted", "--test_dataset", type=Path, help="Path to test dataset", default=None
+        "-ted",
+        "--test_dataset",
+        type=Path,
+        help="Path to test dataset",
+        default=None
     )
     argparser.add_argument(
         "-c",
@@ -97,7 +101,8 @@ def main(
     train_loader, test_loader = setup_dataloaders(
         (train_dataset, test_dataset),
         cfg.batch_size,
-        cfg.transform if cfg.transform is not None else tt2.Resize(cfg.target_shape[:2]),
+        cfg.transform if cfg.transform is not None else
+        tt2.Resize(cfg.target_shape[:2]),
     )
 
     network_summary = summary(cfg.network, verbose=0, depth=5, col_names=[])
@@ -151,5 +156,9 @@ if __name__ == "__main__":
     parser = create_argparser()
     arguments = parser.parse_args()
     configure_logger(arguments.log_folder, arguments.log_name)
-    main(arguments.train_dataset, arguments.test_dataset or arguments.train_dataset,
-         arguments.config, arguments.models_folder)
+    main(
+        arguments.train_dataset,
+        arguments.test_dataset or arguments.train_dataset,
+        arguments.config,
+        arguments.models_folder
+    )
