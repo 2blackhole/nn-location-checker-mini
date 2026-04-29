@@ -21,15 +21,22 @@ def create_argparser() -> argparse.ArgumentParser:
         description="Plot benchmark results from CSV file"
     )
     parser.add_argument(
-        "-i", "--input", type=Path, default=Path("benchmark_results.csv"),
+        "-i",
+        "--input",
+        type=Path,
+        default=Path("benchmark_results.csv"),
         help="Input CSV file (default: benchmark_results.csv)"
     )
     parser.add_argument(
-        "-o", "--output", type=Path, default=Path("benchmark_plots.png"),
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("benchmark_plots.png"),
         help="Output plot file (default: benchmark_plots.png)"
     )
     parser.add_argument(
-        "--show", action="store_true",
+        "--show",
+        action="store_true",
         help="Show plot interactively (default: save only)"
     )
     return parser

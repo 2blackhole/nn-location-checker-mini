@@ -21,31 +21,52 @@ def create_argparser() -> argparse.ArgumentParser:
         description="Run all experiments from TOML files in a directory"
     )
     parser.add_argument(
-        "-trd", "--train_dataset", type=Path, required=True,
+        "-trd",
+        "--train_dataset",
+        type=Path,
+        required=True,
         help="Path to the train dataset"
     )
     parser.add_argument(
-        "-ted", "--test_dataset", type=Path, required=True,
+        "-ted",
+        "--test_dataset",
+        type=Path,
+        required=True,
         help="Path to the test dataset"
     )
     parser.add_argument(
-        "-cf", "--configs_folder", type=Path, default=Path("../configs"),
+        "-cf",
+        "--configs_folder",
+        type=Path,
+        default=Path("../configs"),
         help="Folder containing TOML config files (default: ../configs)"
     )
     parser.add_argument(
-        "-o", "--output", type=Path, default=Path("benchmark_results.csv"),
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("benchmark_results.csv"),
         help="Output CSV file (default: benchmark_results.csv)"
     )
     parser.add_argument(
-        "-lf", "--log-folder", type=Path, default=Path("./logs"),
+        "-lf",
+        "--log-folder",
+        type=Path,
+        default=Path("./logs"),
         help="Path to the log folder"
     )
     parser.add_argument(
-        "-m", "--models-folder", type=Path, default=Path("./models"),
+        "-m",
+        "--models-folder",
+        type=Path,
+        default=Path("./models"),
         help="Path to folder where models will be saved"
     )
     parser.add_argument(
-        "--skip-configs", type=str, nargs="+", default=[],
+        "--skip-configs",
+        type=str,
+        nargs="+",
+        default=[],
         help="Skip configs with given names (without .toml extension)"
     )
     return parser
@@ -74,12 +95,18 @@ def run_experiment(
     cmd = [
         sys.executable,
         str(script_path),
-        "-trd", str(args.train_dataset),
-        "-ted", str(args.test_dataset),
-        "-c", str(config_path),
-        "-o", str(output_csv),
-        "-lf", str(args.log_folder),
-        "-m", str(args.models_folder),
+        "-trd",
+        str(args.train_dataset),
+        "-ted",
+        str(args.test_dataset),
+        "-c",
+        str(config_path),
+        "-o",
+        str(output_csv),
+        "-lf",
+        str(args.log_folder),
+        "-m",
+        str(args.models_folder),
     ]
     subprocess.run(cmd, check=True, capture_output=False)
 

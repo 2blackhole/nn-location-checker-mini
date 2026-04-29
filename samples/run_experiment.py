@@ -32,7 +32,11 @@ def create_argparser() -> argparse.ArgumentParser:
         help="Path to train dataset",
     )
     argparser.add_argument(
-        "-ted", "--test_dataset", type=Path, help="Path to test dataset", default=None
+        "-ted",
+        "--test_dataset",
+        type=Path,
+        help="Path to test dataset",
+        default=None
     )
     argparser.add_argument(
         "-c",
@@ -90,11 +94,15 @@ def run(
     with subprocess.Popen(
         [
             sys.executable,
-            str(training_script),
-            "-trd", str(train_dataset),
-            "-ted", str(test_dataset),
-            "-c", str(config),
-            "-m", str(save_folder),
+            training_script,
+            "-trd",
+            str(train_dataset),
+            "-ted",
+            str(test_dataset),
+            "-c",
+            str(config),
+            "-m",
+            str(save_folder),
         ],
         stderr=subprocess.PIPE,
         text=True,
