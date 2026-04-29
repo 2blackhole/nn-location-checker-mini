@@ -1,10 +1,9 @@
 [macro_parameters]
 batch_size = 64
 epochs = 1
-target_shape = [224, 224]
 
 [model]
-name = "mnasnet0_5"
+name = "mnasnet_0_5"
 end = 16
 classifier = "../classifiers/default_classifier.json"
 

@@ -63,7 +63,6 @@ class Experiment:
     donor: str = ""
     segment: str = ""
     classifier: str = ""
-    classifier_name: str = ""
     accuracy: str = ""
     avg_time_per_image: str = ""
     macro_f1: str = ""
@@ -74,7 +73,6 @@ class Experiment:
         "segment": re.compile(r"Segment: (?P<data>\d*:\d*)"),
         "classifier": re.compile(r"Classifier: (?P<data>\[.*?\])"),
         "accuracy": re.compile(r"Accuracy: (?P<data>\d*\.\d*)"),
-        "classifier_name": re.compile(r"Classifier name: (?P<data>\S+)"),
         "macro_f1_per_class": re.compile(r"Macro f1 per class: (?P<data>\[.*\])"),
         "macro_f1": re.compile(r"Macro f1: (?P<data>\d*.\d*)"),
         "avg_time_per_image": re.compile(r"Average time per image: (?P<data>\d*.\d*)"),

@@ -1,7 +1,6 @@
 [macro_parameters]
 batch_size = 128
 epochs = 1
-target_shape = [224, 224]
 
 [model]
 name = "shufflenet_v2_1_5"

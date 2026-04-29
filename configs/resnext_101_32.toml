@@ -1,7 +1,6 @@
 [macro_parameters]
 batch_size = 32
 epochs = 1
-target_shape = [224, 224]
 
 [model]
 name = "resnext_101_32"

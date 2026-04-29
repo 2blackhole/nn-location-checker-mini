@@ -6,7 +6,7 @@ TOML file.
 
 Intended usage::
 
-    config = load_config(Path("config.toml"), TensorShape(227, 227, 3))
+    config = load_config(Path("config.toml"))
 
     for epoch in range(config.epochs):
         train(config.network, config.optimizer, config.loss_function)
@@ -35,7 +35,6 @@ class TrainingConfig:
     donor: str
     transform: tt2.Transform | None
     classifier: Classifier
-    classifier_name: str
     batch_size: int
     epochs: int
     network: ClassificationNetwork
@@ -60,15 +59,13 @@ def load_config(file: Path) -> TrainingConfig:
     internals = load_model_internals(model)
     height, width = cast(tt2.CenterCrop, internals.transform.transforms[1]).size
     target_shape = TensorShape(height, width, 3)
+
     segment_start = model_p.get("start", 0)
     segment_end = model_p["end"]
     segment = ModelSegment(internals.modules, slice(segment_start, segment_end))
     output_shape = segment.compute_shape(target_shape)
     classifier = ModuleLoader(model_p["classifier"]).load(output_shape)
     network = ClassificationNetwork(segment, classifier)
-
-    classifier_path = Path(model_p["classifier"])
-    classifier_name = classifier_path.stem
 
     optimizer = getattr(torch.optim, optimizer_p["name"])(
         network.parameters(), lr=optimizer_p["learning_rate"]
@@ -79,7 +76,6 @@ def load_config(file: Path) -> TrainingConfig:
         donor=model_p["name"],
         transform=internals.transform,
         classifier=classifier,
-        classifier_name=classifier_name,
         batch_size=macro_p["batch_size"],
         epochs=macro_p["epochs"],
         network=network,

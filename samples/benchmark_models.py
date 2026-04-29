@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-src_dir = Path(__file__).resolve().parents[1] / "src"
+src_dir = Path(__file__).resolve().parents[1].joinpath("src")
 sys.path.append(str(src_dir))
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def run_experiment(
     output_csv: Path,
 ) -> None:
     """Run run_experiment.py for a single config and append to CSV."""
-    script_path = Path(__file__).resolve().parent / "run_experiment.py"
+    script_path = Path(__file__).resolve().parent.joinpath("run_experiment.py")
     cmd = [
         sys.executable,
         str(script_path),
