@@ -17,9 +17,7 @@ from tensor_shape import TensorShape, compute_shape
 
 class ModelSegment(tnn.Module):
     def __init__(
-        self,
-        modules: list[tnn.Module],
-        index: int | slice,
+        self, modules: list[tnn.Module], index: int | slice, donor: str
     ) -> None:
         super().__init__()
 
@@ -28,6 +26,7 @@ class ModelSegment(tnn.Module):
 
         self._convolution_layers: tnn.Sequential = tnn.Sequential()
         self._classifier_layers: tnn.Sequential = tnn.Sequential()
+        self._donor = donor
 
         for module in selected_modules:
             self.append(module)
@@ -80,6 +79,14 @@ class ModelSegment(tnn.Module):
             x = self._convolution_layers(x)
         else:
             x = self._convolution_layers(x)
+            if self._donor.startswith("densenet"):
+                x = torch.nn.functional.relu(x, inplace=True)
+                x = torch.nn.functional.adaptive_avg_pool2d(x, (1, 1))
+            elif self._donor.startswith("mnasnet"):
+                x = x.mean([2, 3])
+                return self._classifier_layers(x)
+            elif self._donor == "mobilenet_v2":
+                x = torch.nn.functional.adaptive_avg_pool2d(x, (1, 1))
             x = torch.flatten(x, 1)
             x = self._classifier_layers(x)
 

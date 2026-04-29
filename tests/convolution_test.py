@@ -6,7 +6,7 @@ sys_path.append(str(src_directory))
 
 import torch.nn as tnn
 
-from tensor_shape import TensorShape, compute_conv, compute_shape
+from tensor_shape import TensorShape, compute_conv, compute_pool, compute_shape
 
 
 def test_compute_conv():
@@ -56,6 +56,11 @@ def test_batch_norm():
     result = compute_shape(activation, shape)
 
     assert result == shape
+
+
+def test_compute_pool():
+    assert compute_pool(112, 0, 3, 2, 1, False) == 55
+    assert compute_pool(112, 0, 3, 2, 1, True) == 56
 
 
 def test_max_pool():

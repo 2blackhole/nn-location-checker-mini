@@ -33,7 +33,7 @@ __all__ = ["TrainingConfig", "load_config"]
 @dataclass
 class TrainingConfig:
     donor: str
-    transform: tt2.Transform | None
+    transform: tt2.Transform
     classifier: Classifier
     batch_size: int
     epochs: int
@@ -62,7 +62,9 @@ def load_config(file: Path) -> TrainingConfig:
 
     segment_start = model_p.get("start", 0)
     segment_end = model_p["end"]
-    segment = ModelSegment(internals.modules, slice(segment_start, segment_end))
+    segment = ModelSegment(
+        internals.modules, slice(segment_start, segment_end), model_p["name"]
+    )
     output_shape = segment.compute_shape(target_shape)
     classifier = ModuleLoader(model_p["classifier"]).load(output_shape)
     network = ClassificationNetwork(segment, classifier)
