@@ -59,7 +59,6 @@ def load_config(file: Path) -> TrainingConfig:
     internals = load_model_internals(model)
     height, width = cast(tt2.CenterCrop, internals.transform.transforms[1]).size
     target_shape = TensorShape(height, width, 3)
-
     segment_start = model_p.get("start", 0)
     segment_end = model_p["end"]
     segment = ModelSegment(

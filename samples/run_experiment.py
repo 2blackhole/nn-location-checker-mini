@@ -100,7 +100,7 @@ def run(
         text=True,
         bufsize=1,
     ) as training:
-        for line in training.stderr:
+        for line in training.stderr: # ty:ignore[not-iterable]
             logger.info(dedup_logger_output(line.rstrip()))
             experiment.update(line)
 

@@ -78,8 +78,8 @@ def setup_dataloaders(
     )
 
 
-def format_torchsummary(summary_str: str) -> str:
-    lines = summary_str.splitlines()
+def format_torchsummary(summary: str) -> str:
+    lines = summary.splitlines()
     end = next(i for i, line in enumerate(lines) if i > 3 and line.endswith("="))
     return "\n".join(lines[3:end])
 
@@ -142,7 +142,7 @@ def main(
     logger.info(f"Save model's weights to {save_folder}")
     try:
         if not save_folder.exists():
-            save_folder.mkdir(parents=True)
+            save_folder.mkdir()
         cfg.network = cfg.network.cpu()
         file_path = save_folder.joinpath(create_file_name(save_folder))
         with file_path.open(mode="wb") as weights_file:
