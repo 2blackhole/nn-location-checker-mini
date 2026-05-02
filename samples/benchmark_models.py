@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 def create_argparser() -> argparse.ArgumentParser:
-    """Create argument parser for benchmark script."""
     parser = argparse.ArgumentParser(
         description="Run all experiments from TOML files in a directory"
     )
@@ -64,7 +63,6 @@ def create_argparser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--skip-configs",
-        type=str,
         nargs="+",
         default=[],
         help="Skip configs with given names (without .toml extension)"
@@ -75,7 +73,9 @@ def create_argparser() -> argparse.ArgumentParser:
 def get_config_files(configs_folder: Path, skip_names: set[str]) -> list[Path]:
     """Return sorted list of .toml config files, skipping those in skip_names."""
     if not configs_folder.exists():
-        raise FileNotFoundError(f"Configs folder {configs_folder} does not exist.")
+        raise FileNotFoundError(
+            f"Configs folder {configs_folder} does not exist."
+        )
     all_configs = sorted(configs_folder.glob("*.toml"))
     filtered = [cfg for cfg in all_configs if cfg.stem not in skip_names]
     if not filtered:
@@ -88,7 +88,6 @@ def get_config_files(configs_folder: Path, skip_names: set[str]) -> list[Path]:
 def run_experiment(
     config_path: Path,
     args: argparse.Namespace,
-    output_csv: Path,
 ) -> None:
     """Run run_experiment.py for a single config and append to CSV."""
     script_path = Path(__file__).resolve().parent.joinpath("run_experiment.py")
@@ -102,7 +101,7 @@ def run_experiment(
         "-c",
         str(config_path),
         "-o",
-        str(output_csv),
+        str(args.output),
         "-lf",
         str(args.log_folder),
         "-m",
@@ -118,23 +117,23 @@ def main() -> None:
     config_files = get_config_files(args.configs_folder, skip_set)
 
     if skip_set:
-        logger.info(f"Skipping {len(skip_set)} config(s): {', '.join(skip_set)}")
+        logger.info(
+            f"Skipping {len(skip_set)} config(s): {', '.join(skip_set)}"
+        )
     logger.info(f"Found {len(config_files)} config files:")
     for cfg in config_files:
         logger.info(f"  {cfg.name}")
-
-    output_csv = args.output
 
     for cfg in config_files:
         model_name = cfg.stem
         logger.info(f"\n=== Running experiment for {model_name} ===")
         try:
-            run_experiment(cfg, args, output_csv)
+            run_experiment(cfg, args)
         except Exception as e:
             logger.error(f"Experiment {cfg.name} failed: {e}")
             logger.info("Continuing with next config...")
 
-    logger.info(f"\nAll experiments finished. Results saved to {output_csv}")
+    logger.info(f"\nAll experiments finished. Results saved to {args.output}")
 
 
 if __name__ == "__main__":

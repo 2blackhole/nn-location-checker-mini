@@ -42,21 +42,16 @@ def create_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def format_metric(value: float, as_percent: bool = True) -> str:
-    """Format metric value for bar labels.
+def format_percent(value: float) -> str:
+    """Format value as percentage, use scientific notation for tiny values."""
+    val_pct = value * 100
+    if val_pct >= 0.1:
+        return f"{val_pct:.1f}%"
+    return f"{val_pct:.1e}%"
 
-    Args:
-        value: Metric value (e.g., 0.1234)
-        as_percent: If True, multiply by 100 and add '%' sign.
 
-    Returns:
-        Formatted string like '12.3%' or '1.2e-3%' for very small values.
-    """
-    if as_percent:
-        val_pct = value * 100
-        if val_pct >= 0.1:
-            return f"{val_pct:.1f}%"
-        return f"{val_pct:.1e}%"
+def format_raw(value: float) -> str:
+    """Format raw value, use scientific notation for tiny values."""
     if value >= 0.001:
         return f"{value:.3f}"
     return f"{value:.1e}"
@@ -67,8 +62,7 @@ def load_data(
 ) -> tuple[list[str], list[float], list[float], list[float]]:
     """Load CSV and return labels, accuracy, macro_f1, avg_time.
 
-    Raises:
-        ValueError: If required columns are missing or data is invalid.
+    Label format: "donor (segment)-row_number". Row number starts from 2.
     """
     labels: list[str] = []
     accuracy: list[float] = []
@@ -84,13 +78,10 @@ def load_data(
         if missing:
             raise ValueError(f"Missing required columns: {missing}")
 
-        has_clf_name = "classifier_name" in reader.fieldnames
-
         for row_num, row in enumerate(reader, start=2):
             donor = row.get("donor", "").strip()
             if not donor:
                 raise ValueError(f"Row {row_num}: empty donor field")
-
             try:
                 acc = float(row["accuracy"])
                 f1 = float(row["macro_f1"])
@@ -101,15 +92,10 @@ def load_data(
                 ) from e
 
             segment = row.get("segment", "").strip()
-            clf_name = (
-                row.get("classifier_name", "").strip()
-                if has_clf_name else ""
-            )
-
-            if has_clf_name and clf_name:
-                label = f"{donor} : {clf_name}"
+            if segment:
+                label = f"{donor} ({segment})-{row_num}"
             else:
-                label = f"{donor} ({segment})" if segment else donor
+                label = f"{donor}-{row_num}"
 
             labels.append(label)
             accuracy.append(acc)
@@ -121,8 +107,11 @@ def load_data(
     return labels, accuracy, macro_f1, avg_time
 
 
-def plot_accuracy(ax: plt.Axes, labels: list[str], values: list[float]) -> None:
-    """Plot accuracy bar chart."""
+def plot_accuracy(
+    ax: plt.Axes,
+    labels: list[str],
+    values: list[float],
+) -> None:
     x = np.arange(len(labels))
     bars = ax.bar(x, values, width=0.6, color="skyblue")
     ax.set_xticks(x)
@@ -132,31 +121,37 @@ def plot_accuracy(ax: plt.Axes, labels: list[str], values: list[float]) -> None:
     ax.set_ylim(0, max(1.0, max(values) * 1.1))
     ax.bar_label(
         bars,
-        fmt=lambda v: format_metric(v, as_percent=True),
+        fmt=lambda v: format_percent(v),
         label_type="edge",
         padding=2,
     )
 
 
-def plot_macro_f1(ax: plt.Axes, labels: list[str], values: list[float]) -> None:
-    """Plot macro F1 bar chart."""
+def plot_macro_f1(
+    ax: plt.Axes,
+    labels: list[str],
+    values: list[float],
+) -> None:
     x = np.arange(len(labels))
     bars = ax.bar(x, values, width=0.6, color="lightgreen")
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
     ax.set_ylabel("Macro F1 Score")
-    ax.set_title("Macro-averaged F1")
+    ax.set_title("Macro F1")
     ax.set_ylim(0, max(1.0, max(values) * 1.1))
     ax.bar_label(
         bars,
-        fmt=lambda v: format_metric(v, as_percent=True),
+        fmt=lambda v: format_percent(v),
         label_type="edge",
         padding=2,
     )
 
 
-def plot_avg_time(ax: plt.Axes, labels: list[str], values: list[float]) -> None:
-    """Plot average time per image bar chart (seconds)."""
+def plot_avg_time(
+    ax: plt.Axes,
+    labels: list[str],
+    values: list[float],
+) -> None:
     x = np.arange(len(labels))
     bars = ax.bar(x, values, width=0.6, color="salmon")
     ax.set_xticks(x)
@@ -164,58 +159,59 @@ def plot_avg_time(ax: plt.Axes, labels: list[str], values: list[float]) -> None:
     ax.set_ylabel("Seconds")
     ax.set_title("Average Time per Image")
 
-    if max(values) / min(values) > 100:
+    if max(values) / min(values) <= 100:
+        ax.set_ylim(0, max(values) * 1.1)
+        ax.bar_label(
+            bars,
+            fmt=lambda v: format_raw(v) + "s",
+            label_type="edge",
+            padding=2,
+        )
+    else:
         ax.set_yscale("log")
         for bar, val in zip(bars, values, strict=False):
-            label = format_metric(val, as_percent=False) + "s"
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 val,
-                label,
+                format_raw(val) + "s",
                 ha="center",
                 va="bottom",
                 fontsize=8,
             )
-    else:
-        ax.set_ylim(0, max(values) * 1.1)
-        ax.bar_label(
-            bars,
-            fmt=lambda v: format_metric(v, as_percent=False) + "s",
-            label_type="edge",
-            padding=2,
-        )
 
 
-def plot_fps(ax: plt.Axes, labels: list[str], avg_time: list[float]) -> None:
-    """Plot FPS bar chart (images per second)."""
+def plot_fps(
+    ax: plt.Axes,
+    labels: list[str],
+    avg_time: list[float],
+) -> None:
     fps = [1.0 / t for t in avg_time]
     x = np.arange(len(labels))
     bars = ax.bar(x, fps, width=0.6, color="gold")
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
     ax.set_ylabel("Images/sec")
-    ax.set_title("Throughput (FPS)")
+    ax.set_title("FPS")
 
-    if max(fps) / min(fps) > 100:
+    if max(fps) / min(fps) <= 100:
+        ax.set_ylim(0, max(fps) * 1.1)
+        ax.bar_label(
+            bars,
+            fmt=lambda v: format_raw(v),
+            label_type="edge",
+            padding=2,
+        )
+    else:
         ax.set_yscale("log")
         for bar, val in zip(bars, fps, strict=False):
-            label = format_metric(val, as_percent=False)
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 val,
-                label,
+                format_raw(val),
                 ha="center",
                 va="bottom",
                 fontsize=8,
             )
-    else:
-        ax.set_ylim(0, max(fps) * 1.1)
-        ax.bar_label(
-            bars,
-            fmt=lambda v: format_metric(v, as_percent=False),
-            label_type="edge",
-            padding=2,
-        )
 
 
 def plot_metrics(
@@ -226,7 +222,6 @@ def plot_metrics(
     output_path: Path,
     show: bool = False,
 ) -> None:
-    """Generate 2x2 subplot with all metrics."""
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle("Model Benchmark Comparison", fontsize=16)
 
@@ -245,7 +240,6 @@ def plot_metrics(
 
 
 def main() -> None:
-    """Main entry point."""
     args = create_argparser().parse_args()
     try:
         if not args.input.exists():
